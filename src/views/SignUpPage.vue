@@ -4,32 +4,32 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-body">
-                        <h2 class="card-title text-center">Sign Up</h2>
+                        <h2 class="card-title text-center">Registrarse</h2>
                         <form @submit.prevent="handleSignUp">
                             <div class="form-group mb-3">
-                                <label for="email">Email address</label>
+                                <label for="email">Correo electrónico</label>
                                 <input type="email" class="form-control" id="email" v-model="email"
                                     @focus="startTiming('email')" @blur="() => endTiming('email', times)"
-                                    placeholder="Enter your email" required />
+                                    placeholder="Introduce tu direccion de correo electrónico" required />
                                 <div v-if="errors.email" class="text-danger">{{ errors.email }}</div>
                             </div>
                             <div class="form-group mb-3">
-                                <label for="password">Password</label>
+                                <label for="password">Contraseña</label>
                                 <input type="password" class="form-control" id="password" v-model="password"
                                     @focus="startTiming('password')" @blur="() => endTiming('password', times)"
-                                    placeholder="Enter your password" required />
+                                    placeholder="Introduce tu contraseña" required />
                                 <div v-if="errors.password" class="text-danger">{{ errors.password }}</div>
                             </div>
                             <div class="form-group mb-3">
-                                <label for="confirmPassword">Confirm Password</label>
+                                <label for="confirmPassword">Confirmar contraseña</label>
                                 <input @focus="startTiming('confirmPassword')"
                                     @blur="() => endTiming('confirmPassword', times)" type="password"
                                     class="form-control" id="confirmPassword" v-model="confirmPassword"
-                                    placeholder="Confirm your password" required />
+                                    placeholder="Vuelve a introducir tu contraseña" required />
                                 <div v-if="errors.confirmPassword" class="text-danger">{{ errors.confirmPassword }}
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+                            <button type="submit" class="btn btn-primary w-100">Registrarse</button>
                             <div v-if="message" class="mt-3 alert" :class="alertClass">
                                 {{ message }}
                             </div>

@@ -4,21 +4,21 @@
             <div class="col-md-12">
                 <div class="card">
                     <div class="card-body">
-                        <h2 class="card-title text-center">Login</h2>
+                        <h2 class="card-title text-center">Inicio de sesión</h2>
                         <form @submit.prevent="handleLogin">
                             <div class="form-group mb-3">
-                                <label for="email">Email address</label>
+                                <label for="email">Correo electrónico</label>
                                 <input type="email" class="form-control" id="email" v-model="email"
                                     @focus="startTiming('email')" @blur="() => endTiming('email', times)"
-                                    placeholder="Enter your email" required />
+                                    placeholder="Introduce tu direccion de correo electrónico" required />
                             </div>
                             <div class="form-group mb-3">
-                                <label for="password">Password</label>
+                                <label for="password">Contraseña</label>
                                 <input type="password" class="form-control" id="password" v-model="password"
                                     @focus="startTiming('password')" @blur="() => endTiming('password', times)"
-                                    placeholder="Enter your password" required />
+                                    placeholder="Introduce tu contraseña" required />
                             </div>
-                            <button type="submit" class="btn btn-primary w-100">Login</button>
+                            <button type="submit" class="btn btn-primary w-100">Iniciar sesión</button>
                         </form>
                         <div v-if="errorMessage" class="alert alert-danger mt-3">
                             {{ errorMessage }}
