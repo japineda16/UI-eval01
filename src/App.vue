@@ -16,7 +16,6 @@ import { supabase } from "./utils/supabase";
 const {
   data: { user },
 } = await supabase.auth.getUser();
-console.log('User:', user);
 export default {
   name: 'App',
   methods: {

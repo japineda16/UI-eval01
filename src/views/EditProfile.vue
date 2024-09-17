@@ -18,33 +18,18 @@
                 </div>
             </div>
 
-            <!-- Location -->
-            <h4 class="mt-3">Location</h4>
-            <div class="form-row">
-                <div class="col">
-                    <label for="street">Street</label>
-                    <input type="text" v-model="profile.location.street" class="form-control" id="street" required />
-                </div>
-                <div class="col">
-                    <label for="city">City</label>
-                    <input type="text" v-model="profile.location.city" class="form-control" id="city" required />
-                </div>
-            </div>
-
-            <div class="form-row">
-                <div class="col">
-                    <label for="state">State</label>
-                    <input type="text" v-model="profile.location.state" class="form-control" id="state" required />
-                </div>
-                <div class="col">
-                    <label for="country">Country</label>
-                    <input type="text" v-model="profile.location.country" class="form-control" id="country" required />
-                </div>
-                <div class="col">
-                    <label for="postcode">Postcode</label>
-                    <input type="number" v-model="profile.location.postcode" class="form-control" id="postcode"
-                        required />
-                </div>
+            <!-- Address Autocomplete -->
+            <div class="form-group">
+                <label for="address">Address</label>
+                <input type="text" v-model="addressQuery" class="form-control" id="address"
+                    @input="fetchLocationSuggestions" placeholder="Start typing your address" required />
+                <!-- Sugerencias de dirección -->
+                <ul class="list-group mt-2" v-if="suggestions.length > 0">
+                    <li class="list-group-item" v-for="(suggestion, index) in suggestions" :key="index"
+                        @click="selectAddress(suggestion)" style="cursor: pointer;">
+                        {{ suggestion?.display_name }}
+                    </li>
+                </ul>
             </div>
 
             <!-- Email, Phone, etc. -->
@@ -71,7 +56,8 @@
 import { defineComponent } from 'vue';
 
 import { supabase } from "../utils/supabase"
-import { UserProfile } from '../types/interfaces';
+import { LocationResponse, UserProfile } from '../types/interfaces';
+import axios from 'axios';
 
 export default defineComponent({
     data() {
@@ -104,7 +90,9 @@ export default defineComponent({
                     date: '',
                     age: 0
                 }
-            } as UserProfile
+            } as UserProfile,
+            addressQuery: '',
+            suggestions: [] as LocationResponse[]
         };
     },
     mounted() {
@@ -120,7 +108,6 @@ export default defineComponent({
                     .select('*')
                     .eq('user_id', user.id)
                     .single();
-                console.log('Profile:', data);
                 if (data) {
                     this.profile = data;
                 }
@@ -138,6 +125,40 @@ export default defineComponent({
             } else {
                 alert('Profile updated successfully');
             }
+        },
+        async fetchLocationSuggestions() {
+            if (this.addressQuery.length > 2) {
+                try {
+                    const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+                        params: {
+                            q: this.addressQuery,
+                            format: 'json',
+                            addressdetails: 1,
+                            limit: 5
+                        }
+                    });
+                    this.suggestions = response.data as LocationResponse[];
+                } catch (error) {
+                    console.error('Error fetching location suggestions:', error);
+                }
+            }
+        },
+        selectAddress(suggestion: any) {
+            this.addressQuery = suggestion.display_name;
+            // Llenamos los campos de location con los datos del API
+            this.profile.location = {
+                street: suggestion.address.road || '',
+                city: suggestion.address.city || '',
+                state: suggestion.address.state || '',
+                country: suggestion.address.country || '',
+                postcode: suggestion.address.postcode || 0,
+                coordinates: {
+                    latitude: suggestion.lat,
+                    longitude: suggestion.lon
+                },
+                timezone: '' // Aquí podrías agregar una API adicional para la zona horaria
+            };
+            this.suggestions = []; // Limpiar las sugerencias después de seleccionar
         }
     }
 });
