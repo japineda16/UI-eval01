@@ -14,6 +14,7 @@ export interface UserProfile {
   id: number;
   picture: Picture | string;
   nat: string;
+  userId?: string;
 }
 
 export interface Name {

@@ -5,7 +5,7 @@
             <!-- Name -->
             <div class="form-row">
                 <div class="col">
-                    <label for="title">Title</label>
+                    <label for="title">Nombre</label>
                     <input type="text" v-model="profile.name.title" class="form-control" id="title" required />
                 </div>
                 <div class="col">
@@ -118,8 +118,9 @@ export default defineComponent({
                 const { data, error: _error } = await supabase
                     .from('profiles')
                     .select('*')
-                    .eq('id', user.id)
+                    .eq('user_id', user.id)
                     .single();
+                console.log('Profile:', data);
                 if (data) {
                     this.profile = data;
                 }

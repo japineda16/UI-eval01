@@ -21,14 +21,27 @@
         </li>
       </ul>
     </div>
+      <a @click="logout" href="#">Cerrar sesión</a>
   </div>
 </nav>
 <router-view />
 </template>
 
 <script>
+import { supabase } from "./utils/supabase";
 export default {
-  name: 'App'
+  name: 'App',
+  methods: {
+    async logout() {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error logging out:', error.message);
+      } else {
+        // Redirect to login page or perform any other action
+        this.$router.push('/login');
+      }
+    }
+  }
 };
 </script>
 

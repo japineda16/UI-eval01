@@ -63,7 +63,7 @@ export default defineComponent({
             if (error) {
                 errorMessage.value = error.message;
             } else {
-                window.location.href = '/';
+                window.location.href = '/login';
             }
         };
 
