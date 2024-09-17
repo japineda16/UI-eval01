@@ -37,6 +37,18 @@ const routes = [
     path: "/sign-up",
     name: "Registro",
     component: () => import("./views/SignUpPage.vue"),
+    beforeEnter: async (_to: any, _from: any, next: any) => {
+      // Verifica si el usuario tiene sesión abierta
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        next("/edit-profile");
+      } else {
+        next();
+      }
+    },
   },
   {
     path: "/edit-profile",
