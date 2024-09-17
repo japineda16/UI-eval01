@@ -29,6 +29,10 @@
 
 <script>
 import { supabase } from "./utils/supabase";
+const {
+  data: { user },
+} = await supabase.auth.getUser();
+console.log('User:', user);
 export default {
   name: 'App',
   methods: {
@@ -41,7 +45,12 @@ export default {
         this.$router.push('/login');
       }
     }
-  }
+  },
+  data() {
+    return {
+      user
+    };
+  },
 };
 </script>
 
