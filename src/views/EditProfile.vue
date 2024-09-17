@@ -6,23 +6,27 @@
             <div class="form-row">
                 <div class="col">
                     <label for="title">Nombre</label>
-                    <input type="text" v-model="profile.name.title" class="form-control" id="title" required />
+                    <input @focus="startInputTiming('title')" @blur="endInputTiming('title')" type="text"
+                        v-model="profile.name.title" class="form-control" id="title" required />
                 </div>
                 <div class="col">
                     <label for="firstName">First Name</label>
-                    <input type="text" v-model="profile.name.first" class="form-control" id="firstName" required />
+                    <input @focus="startInputTiming('firstName')" @blur="endInputTiming('firstName')" type="text"
+                        v-model="profile.name.first" class="form-control" id="firstName" required />
                 </div>
                 <div class="col">
                     <label for="lastName">Last Name</label>
-                    <input type="text" v-model="profile.name.last" class="form-control" id="lastName" required />
+                    <input @focus="startInputTiming('lastName')" @blur="endInputTiming('lastName')" type="text"
+                        v-model="profile.name.last" class="form-control" id="lastName" required />
                 </div>
             </div>
 
             <!-- Address Autocomplete -->
             <div class="form-group">
                 <label for="address">Address</label>
-                <input type="text" v-model="addressQuery" class="form-control" id="address"
-                    @input="fetchLocationSuggestions" placeholder="Start typing your address" required />
+                <input @focus="startInputTiming('address')" @blur="endInputTiming('address')" type="text"
+                    v-model="addressQuery" class="form-control" id="address" @input="fetchLocationSuggestions"
+                    placeholder="Start typing your address" required />
                 <!-- Sugerencias de dirección -->
                 <ul class="list-group mt-2" v-if="suggestions.length > 0">
                     <li class="list-group-item" v-for="(suggestion, index) in suggestions" :key="index"
@@ -41,19 +45,27 @@
             <!-- Email, Phone, etc. -->
             <div class="form-group mt-3">
                 <label for="email">Email</label>
-                <input type="email" v-model="profile.email" class="form-control" id="email" required />
+                <input @focus="startInputTiming('email')" @blur="endInputTiming('email')" type="email"
+                    v-model="profile.email" class="form-control" id="email" required />
             </div>
             <div class="form-group">
                 <label for="phone">Phone</label>
-                <input type="text" v-model="profile.phone" class="form-control" id="phone" required />
+                <input @focus="startInputTiming('phone')" @blur="endInputTiming('phone')" type="text"
+                    v-model="profile.phone" class="form-control" id="phone" required />
             </div>
 
             <div class="form-group">
                 <label for="picture">Profile Picture URL</label>
-                <input type="text" v-model="profile.picture" class="form-control" id="picture" />
+                <input @focus="startInputTiming('picture')" @blur="endInputTiming('picture')" type="text"
+                    v-model="profile.picture" class="form-control" id="picture" />
             </div>
-
-            <button type="submit" class="btn btn-primary">Save Changes</button>
+            <div v-if="isSaved" class="mt-2 alert alert-success" role="alert">
+                A simple success alert—check it out!
+            </div>
+            <div v-if="isSaved != undefined && !isSaved" class="mt-2 alert alert-danger" role="alert">
+                A simple danger alert—check it out!
+            </div>
+            <button type="submit" class="mt-2 btn btn-primary">Save Changes</button>
         </form>
     </div>
 </template>
@@ -64,10 +76,12 @@ import { supabase } from "../utils/supabase"
 import { LocationResponse, UserProfile } from '../types/interfaces';
 import axios from 'axios';
 import L from 'leaflet';
+import { endTiming, startTiming } from '../utils/timingUtils';
 
 export default defineComponent({
     data() {
         return {
+            isSaved: undefined as boolean | undefined,
             profile: {
                 gender: '',
                 name: {
@@ -99,7 +113,8 @@ export default defineComponent({
             } as UserProfile,
             addressQuery: '',
             suggestions: [] as LocationResponse[],
-            map: null
+            map: null,
+            formTimes: {} as { [key: string]: number } // Almacena los tiempos de cada campo
         };
     },
     mounted() {
@@ -136,10 +151,12 @@ export default defineComponent({
                 .from('profiles')
                 .update(this.profile)
                 .eq('id', this.profile.id);
-
+            await this.saveFormTimings(); // Guardar los tiempos de los campos
             if (error) {
+                this.isSaved = false;
                 console.error('Error saving profile:', error);
             } else {
+                this.isSaved = true;
                 alert('Profile updated successfully');
             }
         },
@@ -195,6 +212,32 @@ export default defineComponent({
             // Agregar un marcador en las coordenadas
             L.marker([Number(this.profile.location.coordinates.latitude), Number(this.profile.location.coordinates.longitude)]).addTo(this.map);
         },
+
+        startInputTiming(input: string) {
+            startTiming(input); // Inicia el tiempo
+        },
+        endInputTiming(input: string) {
+            endTiming(input, this.formTimes); // Finaliza el tiempo y lo guarda en formTimes
+        },
+        async saveFormTimings() {
+            const pageName = 'EditProfile'; // Página actual
+
+            for (const input in this.formTimes) {
+                const time = this.formTimes[input];
+
+                // Insertar los tiempos en la tabla form-timing
+                const { error } = await supabase
+                    .from('form-timing')
+                    .insert({ page: pageName, input, time });
+
+                if (error) {
+                    console.error(`Error saving timing for ${input}:`, error);
+                }
+                if (!error) {
+                    this.formTimes = {} as { [key: string]: number }; // Limpiar los tiempos después de guardar
+                }
+            }
+        }
     }
 });
 </script>
