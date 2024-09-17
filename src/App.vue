@@ -25,7 +25,7 @@
           </li>
         </ul>
       </div>
-      <a v-if="user?.id != undefined" @click="logout" href="#">Cerrar sesión</a>
+      <a v-if="user?.id" @click="logout" href="#">Cerrar sesión</a>
     </div>
   </nav>
   <router-view />
@@ -36,7 +36,6 @@ import { supabase } from "./utils/supabase";
 const {
   data: { user },
 } = await supabase.auth.getUser();
-console.log(user?.id);
 export default {
   name: 'App',
   methods: {
@@ -46,14 +45,19 @@ export default {
         console.error('Error logging out:', error.message);
       } else {
         // Redirect to login page or perform any other action
-        this.$router.push('/login');
+        window.location.href = '/login';
       }
+    }
+  },
+  computed: {
+    user() {
+      return this.user;
     }
   },
   data() {
     return {
-      user
-    };
+      user: user
+    }
   },
 };
 </script>

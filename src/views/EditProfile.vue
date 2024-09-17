@@ -123,7 +123,6 @@ export default defineComponent({
     beforeMount() {
         (async () => {
             await this.loadProfile();
-            console.log(this.profile);
         })();
     },
     methods: {
