@@ -3,19 +3,14 @@
         <h2>Edit Profile</h2>
         <form @submit.prevent="saveProfile">
             <!-- Name -->
-            <div class="form-row">
+            <div class="row">
                 <div class="col">
-                    <label for="title">Nombre</label>
-                    <input @focus="startInputTiming('title')" @blur="endInputTiming('title')" type="text"
-                        v-model="profile.name.title" class="form-control" id="title" required />
-                </div>
-                <div class="col">
-                    <label for="firstName">First Name</label>
+                    <label for="firstName">Primer nombre</label>
                     <input @focus="startInputTiming('firstName')" @blur="endInputTiming('firstName')" type="text"
                         v-model="profile.name.first" class="form-control" id="firstName" required />
                 </div>
                 <div class="col">
-                    <label for="lastName">Last Name</label>
+                    <label for="lastName">Apellidos</label>
                     <input @focus="startInputTiming('lastName')" @blur="endInputTiming('lastName')" type="text"
                         v-model="profile.name.last" class="form-control" id="lastName" required />
                 </div>
@@ -23,10 +18,10 @@
 
             <!-- Address Autocomplete -->
             <div class="form-group">
-                <label for="address">Address</label>
+                <label for="address">Dirección</label>
                 <input @focus="startInputTiming('address')" @blur="endInputTiming('address')" type="text"
                     v-model="addressQuery" class="form-control" id="address" @input="fetchLocationSuggestions"
-                    placeholder="Start typing your address" required />
+                    placeholder="Buscar dirección..." required />
                 <!-- Sugerencias de dirección -->
                 <ul class="list-group mt-2" v-if="suggestions.length > 0">
                     <li class="list-group-item" v-for="(suggestion, index) in suggestions" :key="index"
@@ -38,7 +33,7 @@
 
             <!-- Mapa -->
             <div v-if="profile.location.coordinates.latitude && profile.location.coordinates.longitude" class="mt-3">
-                <h4>Location Map</h4>
+                <h4>Mapa</h4>
                 <div id="map" style="height: 300px;"></div>
             </div>
 
@@ -49,23 +44,23 @@
                     v-model="profile.email" class="form-control" id="email" required />
             </div>
             <div class="form-group">
-                <label for="phone">Phone</label>
+                <label for="phone">Telefono</label>
                 <input @focus="startInputTiming('phone')" @blur="endInputTiming('phone')" type="text"
                     v-model="profile.phone" class="form-control" id="phone" required />
             </div>
 
             <div class="form-group">
-                <label for="picture">Profile Picture URL</label>
+                <label for="picture">Foto</label>
                 <input @focus="startInputTiming('picture')" @blur="endInputTiming('picture')" type="text"
                     v-model="profile.picture" class="form-control" id="picture" />
             </div>
             <div v-if="isSaved" class="mt-2 alert alert-success" role="alert">
-                A simple success alert—check it out!
+                Se ha guardado correctamente.
             </div>
             <div v-if="isSaved != undefined && !isSaved" class="mt-2 alert alert-danger" role="alert">
-                A simple danger alert—check it out!
+                Hubo un error al guardar. Por favor, inténtelo de nuevo.
             </div>
-            <button type="submit" class="mt-2 btn btn-primary">Save Changes</button>
+            <button type="submit" class="mt-2 btn btn-primary">Guardar cambios</button>
         </form>
     </div>
 </template>
@@ -146,6 +141,7 @@ export default defineComponent({
             }
         },
         async saveProfile() {
+            this.profile.name.title = `${this.profile.name.first} ${this.profile.name.last}`; // Asignar el título
             // Save the updated profile to Supabase
             const { error } = await supabase
                 .from('profiles')
@@ -157,7 +153,6 @@ export default defineComponent({
                 console.error('Error saving profile:', error);
             } else {
                 this.isSaved = true;
-                alert('Profile updated successfully');
             }
         },
         async fetchLocationSuggestions() {
@@ -179,6 +174,7 @@ export default defineComponent({
         },
         selectAddress(suggestion: any) {
             this.addressQuery = suggestion.display_name;
+            console.log(suggestion);
             // Llenamos los campos de location con los datos del API
             this.profile.location = {
                 street: suggestion.address.road || '',
@@ -244,7 +240,7 @@ export default defineComponent({
 
 <style scoped>
 .container {
-    max-width: 600px;
+    max-width: 900px;
 }
 
 .list-group-item:hover {
