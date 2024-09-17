@@ -14,7 +14,7 @@ const routes = [
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      console.log(user);
+
       if (user) {
         next("/edit-profile");
       } else {
@@ -31,7 +31,7 @@ const routes = [
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      console.log(user);
+
       if (user) {
         next("/edit-profile");
       } else {
@@ -49,7 +49,7 @@ const routes = [
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      console.log(user);
+
       if (user) {
         next("/edit-profile");
       } else {
@@ -66,7 +66,7 @@ const routes = [
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      console.log(user);
+
       if (user) {
         next("/edit-profile");
       } else {
@@ -82,7 +82,7 @@ const routes = [
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      console.log(user);
+
       if (!user) {
         next("/login");
       } else {
