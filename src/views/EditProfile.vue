@@ -32,6 +32,12 @@
                 </ul>
             </div>
 
+            <!-- Mapa -->
+            <div v-if="profile.location.coordinates.latitude && profile.location.coordinates.longitude" class="mt-3">
+                <h4>Location Map</h4>
+                <div id="map" style="height: 300px;"></div>
+            </div>
+
             <!-- Email, Phone, etc. -->
             <div class="form-group mt-3">
                 <label for="email">Email</label>
@@ -54,10 +60,10 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-
 import { supabase } from "../utils/supabase"
 import { LocationResponse, UserProfile } from '../types/interfaces';
 import axios from 'axios';
+import L from 'leaflet';
 
 export default defineComponent({
     data() {
@@ -92,11 +98,20 @@ export default defineComponent({
                 }
             } as UserProfile,
             addressQuery: '',
-            suggestions: [] as LocationResponse[]
+            suggestions: [] as LocationResponse[],
+            map: null
         };
     },
     mounted() {
         this.loadProfile();
+    },
+    watch: {
+        // Se activa cuando se actualizan las coordenadas
+        'profile.location.coordinates': function () {
+            if (this.profile.location.coordinates.latitude && this.profile.location.coordinates.longitude) {
+                this.initializeMap();
+            }
+        }
     },
     methods: {
         async loadProfile() {
@@ -159,7 +174,25 @@ export default defineComponent({
                 timezone: '' // Aquí podrías agregar una API adicional para la zona horaria
             };
             this.suggestions = []; // Limpiar las sugerencias después de seleccionar
-        }
+        },
+        initializeMap() {
+            if (this.map) {
+                this.map.remove();
+            }
+            // Crear el mapa centrado en las coordenadas de la ubicación seleccionada
+            this.map = L.map('map').setView(
+                [this.profile.location.coordinates.latitude, this.profile.location.coordinates.longitude],
+                13
+            );
+
+            // Cargar las capas de OpenStreetMap
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                attribution: '&copy; OpenStreetMap contributors'
+            }).addTo(this.map);
+
+            // Agregar un marcador en las coordenadas
+            L.marker([this.profile.location.coordinates.latitude, this.profile.location.coordinates.longitude]).addTo(this.map);
+        },
     }
 });
 </script>
@@ -167,5 +200,13 @@ export default defineComponent({
 <style scoped>
 .container {
     max-width: 600px;
+}
+
+.list-group-item:hover {
+    background-color: #f8f9fa;
+}
+
+#map {
+    height: 300px;
 }
 </style>
