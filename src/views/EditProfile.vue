@@ -62,6 +62,7 @@
             </div>
             <button type="submit" class="mt-2 btn btn-primary">Guardar cambios</button>
         </form>
+        <FormTimingTable />
     </div>
 </template>
 
@@ -72,8 +73,12 @@ import { LocationResponse, UserProfile } from '../types/interfaces';
 import axios from 'axios';
 import L from 'leaflet';
 import { endTiming, startTiming } from '../utils/timingUtils';
+import FormTimingTable from '../components/FormTiming.vue';
 
 export default defineComponent({
+    components: {
+        FormTimingTable
+    },
     data() {
         return {
             isSaved: undefined as boolean | undefined,
