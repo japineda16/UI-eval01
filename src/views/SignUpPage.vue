@@ -14,6 +14,13 @@
                                 <div v-if="errors.email" class="text-danger">{{ errors.email }}</div>
                             </div>
                             <div class="form-group mb-3">
+                                <label for="name">Nombre</label>
+                                <input type="name" class="form-control" id="name" v-model="name"
+                                    @focus="startTiming('name')" @blur="() => endTiming('name', times)"
+                                    placeholder="Enter your name" required />
+                                <div v-if="errors.name" class="text-danger">{{ errors.name }}</div>
+                            </div>
+                            <div class="form-group mb-3">
                                 <label for="password">Password</label>
                                 <input type="password" class="form-control" id="password" v-model="password"
                                     @focus="startTiming('password')" @blur="() => endTiming('password', times)"
@@ -51,37 +58,51 @@ export default defineComponent({
     name: 'SignUpPage',
     setup() {
         const email = ref('');
+        const name = ref('');
         const password = ref('');
         const confirmPassword = ref('');
         const errors = ref<{ [key: string]: string }>({});
         const message = ref<string | null>(null);
         const alertClass = ref('alert-success');
-        const times = ref<{ email: number; password: number, confirmPassword: number }>({
+        const times = ref<{ email: number; password: number, confirmPassword: number, name: number }>({
             email: 0,
             password: 0,
-            confirmPassword: 0
+            confirmPassword: 0,
+            name: 0
         });
 
         const validateForm = () => {
             errors.value = {};
-            if (!email.value) errors.value.email = 'Email is required';
-            if (!password.value) errors.value.password = 'Password is required';
-            if (password.value !== confirmPassword.value) errors.value.confirmPassword = 'Passwords do not match';
+            if (!email.value) errors.value.email = 'El email es obligatorio';
+            if (!password.value) errors.value.password = 'La contraseña es obligatoria';
+            if (!name.value) errors.value.name = 'El nombre es obligatorio';
+            if (password.value !== confirmPassword.value) errors.value.confirmPassword = 'Las contraseñas no son iguales';
             return Object.keys(errors.value).length === 0;
         };
 
         const handleSignUp = async () => {
             if (!validateForm()) return;
 
-            const { error } = await supabase.auth.signUp({
+            const { error, data } = await supabase.auth.signUp({
                 email: email.value,
                 password: password.value,
             });
+            await supabase.from('profiles').insert(
+                {
+                    email: email.value, name: {
+                        title: name.value,
+                        first: name.value,
+                        last: '',
+                    },
+                    user_id: data.user?.id
+                },
+            );
             // Registrar los tiempos de cada campo
             await supabase.from('form-timing').insert([
                 { page: 'Sign Up', input: 'email', time: times.value.email },
                 { page: 'Sign Up', input: 'password', time: times.value.password },
                 { page: 'Sign Up', input: 'confirmPassword', time: times.value.confirmPassword },
+                { page: 'Sign Up', input: 'na,e', time: times.value.name },
             ]);
 
             if (error) {
@@ -94,6 +115,7 @@ export default defineComponent({
         };
 
         return {
+            name,
             email,
             password,
             confirmPassword,
