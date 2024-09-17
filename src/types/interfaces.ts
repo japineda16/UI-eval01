@@ -34,8 +34,8 @@ export interface Location {
 }
 
 export interface Coordinates {
-  latitude: string;
-  longitude: string;
+  latitude: string | number;
+  longitude: string | number;
 }
 
 export interface Login {
