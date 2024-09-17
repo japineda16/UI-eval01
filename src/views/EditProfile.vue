@@ -105,13 +105,11 @@ export default defineComponent({
     mounted() {
         this.loadProfile();
     },
-    watch: {
-        // Se activa cuando se actualizan las coordenadas
-        'profile.location.coordinates': function () {
-            if (this.profile.location.coordinates.latitude && this.profile.location.coordinates.longitude) {
-                this.initializeMap();
-            }
-        }
+    beforeMount() {
+        (async () => {
+            await this.loadProfile();
+            console.log(this.profile);
+        })();
     },
     methods: {
         async loadProfile() {
@@ -125,6 +123,10 @@ export default defineComponent({
                     .single();
                 if (data) {
                     this.profile = data;
+                    // Inicializar el mapa después de cargar el perfil
+                    if (this.profile.location.coordinates.latitude && this.profile.location.coordinates.longitude) {
+                        this.initializeMap();
+                    }
                 }
             }
         },
@@ -181,17 +183,17 @@ export default defineComponent({
             }
             // Crear el mapa centrado en las coordenadas de la ubicación seleccionada
             this.map = L.map('map').setView(
-                [this.profile.location.coordinates.latitude, this.profile.location.coordinates.longitude],
+                [Number(this.profile.location.coordinates.latitude), Number(this.profile.location.coordinates.longitude)],
                 13
             );
 
             // Cargar las capas de OpenStreetMap
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(this.map);
+            })?.addTo(this.map);
 
             // Agregar un marcador en las coordenadas
-            L.marker([this.profile.location.coordinates.latitude, this.profile.location.coordinates.longitude]).addTo(this.map);
+            L.marker([Number(this.profile.location.coordinates.latitude), Number(this.profile.location.coordinates.longitude)]).addTo(this.map);
         },
     }
 });
