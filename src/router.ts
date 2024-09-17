@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from "vue-router";
 import HomePage from "./views/HomePage.vue";
 import AboutPage from "./views/AboutPage.vue";
 import LoginPage from "./views/LoginPage.vue";
+import { supabase } from "./utils/supabase";
 
 const routes = [
   {
@@ -19,6 +20,22 @@ const routes = [
     path: "/sign-up",
     name: "Registro",
     component: () => import("./views/SignUpPage.vue"),
+  },
+  {
+    path: "/edit-profile",
+    component: () => import("./views/EditProfile.vue"),
+    beforeEnter: async (_to: any, _from: any, next: any) => {
+      // Verifica si el usuario tiene sesión abierta
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      console.log(user);
+      if (!user) {
+        next("/login");
+      } else {
+        next();
+      }
+    },
   },
 ];
 
