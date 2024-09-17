@@ -113,7 +113,7 @@ export default defineComponent({
             } as UserProfile,
             addressQuery: '',
             suggestions: [] as LocationResponse[],
-            map: null,
+            map: null as L.Map | null,
             formTimes: {} as { [key: string]: number } // Almacena los tiempos de cada campo
         };
     },
@@ -179,7 +179,6 @@ export default defineComponent({
         },
         selectAddress(suggestion: any) {
             this.addressQuery = suggestion.display_name;
-            console.log(suggestion);
             // Llenamos los campos de location con los datos del API
             this.profile.location = {
                 street: suggestion.address.road || '',
@@ -193,6 +192,21 @@ export default defineComponent({
                 },
                 timezone: '' // Aquí podrías agregar una API adicional para la zona horaria
             };
+            if (this.map) {
+                this.map.remove();
+                this.map = L.map('map').setView(
+                    [Number(suggestion.lat), Number(suggestion.lon)],
+                    13
+                );
+                // Cargar las capas de OpenStreetMap
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(this.map);
+
+                // Agregar un marcador en las coordenadas
+                L.marker([Number(suggestion.lat), Number(suggestion.lon)]).addTo(this.map);
+            }
+
             this.suggestions = []; // Limpiar las sugerencias después de seleccionar
         },
         initializeMap() {
@@ -208,7 +222,7 @@ export default defineComponent({
             // Cargar las capas de OpenStreetMap
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '&copy; OpenStreetMap contributors'
-            })?.addTo(this.map);
+            }).addTo(this.map);
 
             // Agregar un marcador en las coordenadas
             L.marker([Number(this.profile.location.coordinates.latitude), Number(this.profile.location.coordinates.longitude)]).addTo(this.map);

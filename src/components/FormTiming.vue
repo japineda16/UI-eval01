@@ -6,9 +6,9 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>Page</th>
+                    <th>Pagina</th>
                     <th>Input</th>
-                    <th>Time (seconds)</th>
+                    <th>Tiempo (seconds)</th>
                 </tr>
             </thead>
             <tbody>
