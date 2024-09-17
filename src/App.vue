@@ -3,9 +3,9 @@
     <nav>
       <router-link to="/">Home</router-link>
       <router-link to="/about">About</router-link>
-      <router-link to="/login">Login</router-link>
-      <router-link to="/sign-up">Registro</router-link>
-      <a @click="logout" href="#">Cerrar sesión</a>
+      <router-link v-if="!user" to="/login">Login</router-link>
+      <router-link v-if="!user" to="/sign-up">Registro</router-link>
+      <a @click="logout" v-if="user?.id" href="#">Cerrar sesión</a>
     </nav>
     <router-view />
   </div>
@@ -13,6 +13,10 @@
 
 <script>
 import { supabase } from "./utils/supabase";
+const {
+  data: { user },
+} = await supabase.auth.getUser();
+console.log('User:', user);
 export default {
   name: 'App',
   methods: {
@@ -25,7 +29,12 @@ export default {
         this.$router.push('/login');
       }
     }
-  }
+  },
+  data() {
+    return {
+      user
+    };
+  },
 };
 </script>
 
