@@ -49,11 +49,15 @@
                     v-model="profile.phone" class="form-control" id="phone" required />
             </div>
 
+            <!-- Campo de carga de foto -->
             <div class="form-group">
                 <label for="picture">Foto</label>
-                <input @focus="startInputTiming('picture')" @blur="endInputTiming('picture')" type="text"
-                    v-model="profile.picture" class="form-control" id="picture" />
+                <input type="file" class="form-control" id="picture" @change="handleFileChange"
+                    @focus="startInputTiming('picture')" @blur="endInputTiming('picture')" />
+                <img v-if="typeof profile.picture === 'string' && profile.picture" :src="profile.picture"
+                    alt="Foto del perfil" class="mt-2" width="150" />
             </div>
+
             <div v-if="isSaved" class="mt-2 alert alert-success" role="alert">
                 Se ha guardado correctamente.
             </div>
@@ -114,7 +118,8 @@ export default defineComponent({
             addressQuery: '',
             suggestions: [] as LocationResponse[],
             map: null as L.Map | null,
-            formTimes: {} as { [key: string]: number } // Almacena los tiempos de cada campo
+            formTimes: {} as { [key: string]: number }, // Almacena los tiempos de cada campo
+            selectedFile: null as File | null // Almacena el archivo seleccionado
         };
     },
     mounted() {
@@ -145,12 +150,16 @@ export default defineComponent({
             }
         },
         async saveProfile() {
-            this.profile.name.title = `${this.profile.name.first} ${this.profile.name.last}`; // Asignar el título
-            // Save the updated profile to Supabase
+            if (this.selectedFile) {
+                const fileUrl = await this.uploadFile(this.selectedFile);
+                this.profile.picture = fileUrl; // Almacena la URL del archivo subido
+            }
+
             const { error } = await supabase
                 .from('profiles')
                 .update(this.profile)
                 .eq('id', this.profile.id);
+
             await this.saveFormTimings(); // Guardar los tiempos de los campos
             if (error) {
                 this.isSaved = false;
@@ -158,6 +167,29 @@ export default defineComponent({
             } else {
                 this.isSaved = true;
             }
+        },
+        async handleFileChange(event: Event) {
+            const input = event.target as HTMLInputElement;
+            if (input.files && input.files.length > 0) {
+                this.selectedFile = input.files[0]; // Almacenar el archivo seleccionado
+            }
+        },
+        async uploadFile(file: File): Promise<string> {
+            const name = self.crypto.randomUUID()
+            const { error } = await supabase.storage
+                .from('uploads') // Asegúrate de que el bucket 'uploads' exista
+                .upload(`public/${name}`, file, {
+                    cacheControl: '3600',
+                    upsert: false
+                });
+
+            if (error) {
+                console.error('Error uploading file:', error);
+                return '';
+            }
+
+            const { data: { publicUrl } } = supabase.storage.from('uploads').getPublicUrl(`public/${name}`);
+            return publicUrl || '';
         },
         async fetchLocationSuggestions() {
             if (this.addressQuery.length > 2) {
@@ -254,6 +286,9 @@ export default defineComponent({
         }
     }
 });
+
+"https://nvsvcgomyyahwxlbream.supabase.co/storage/v1/object/public/uploads/public/5f046a78-edd4-4503-a1c1-215a21735e6f"
+"https://nvsvcgomyyahwxlbream.supabase.co/storage/v1/object/public/uploads/profile_pictures/5f046a78-edd4-4503-a1c1-215a21735e6f"
 </script>
 
 <style scoped>
