@@ -30,15 +30,16 @@
           <li>
             <router-link to="/terms" class="nav-link active" aria-current="page">Términos y Condiciones</router-link>
           </li>
+          <li v-if="user?.id">
+            <router-link to="/media" class="nav-link active" aria-current="page">Archivos Multimedia</router-link>
+          </li>
         </ul>
       </div>
       <a v-if="user?.id" @click="logout" href="#">Cerrar sesión</a>
     </div>
   </nav>
 
-
   <router-view />
-
 
   <!-- Footer Start -->
   <div class="container-fluid footer py-5 wow fadeIn" data-wow-delay="0.2s" id="footer-color">
@@ -49,7 +50,6 @@
           <div class="footer-item">
             <a href="index.html" class="p-0">
               <h4 class="text-white"><i class="fas fa-search-dollar me-3"></i>Stocker</h4>
-              <!-- <img src="img/logo.png" alt="Logo"> -->
             </a>
             <p class="mb-4">Dolor amet sit justo amet elitr clita ipsum elitr est.Lorem ipsum dolor sit
               amet, consectetur adipiscing...</p>
@@ -164,7 +164,6 @@ export default {
       if (error) {
         console.error('Error logging out:', error.message);
       } else {
-        // Redirect to login page or perform any other action
         window.location.href = '/login';
       }
     }
@@ -181,7 +180,6 @@ export default {
   },
 };
 </script>
-
 
 <style>
 nav {

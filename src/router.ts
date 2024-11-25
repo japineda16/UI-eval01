@@ -92,6 +92,11 @@ const routes = [
     component: () => import("./views/Terms.vue"),
   },
   {
+    path: "/media",
+    name: "Media",
+    component: () => import("./views/MediaViewer.vue"),
+  },
+  {
     path: "/tangram",
     name: "Tangram",
     component: Tangram,
