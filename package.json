@@ -13,8 +13,10 @@
     "@supabase/supabase-js": "^2.45.4",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
+    "gsap": "^3.12.5",
     "leaflet": "^1.9.4",
     "sass": "^1.78.0",
+    "three": "^0.169.0",
     "vue": "^3.4.37",
     "vue-router": "^4.4.5"
   },

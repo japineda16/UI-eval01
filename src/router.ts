@@ -3,6 +3,7 @@ import HomePage from "./views/HomePage.vue";
 import AboutPage from "./views/AboutPage.vue";
 import LoginPage from "./views/LoginPage.vue";
 import Colors from "./views/Colors.vue";
+import Tangram from "./views/Tangram.vue";
 import { supabase } from "./utils/supabase";
 
 const routes = [
@@ -71,6 +72,24 @@ const routes = [
     path: "/colors",
     name: "Colores",
     component: Colors,
+
+    beforeEnter: async (_to: any, _from: any, next: any) => {
+      // Verifica si el usuario tiene sesión abierta
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (user) {
+        next();
+      } else {
+        next("/login");
+      }
+    },
+  },
+  {
+    path: "/tangram",
+    name: "Tangram",
+    component: Tangram,
 
     beforeEnter: async (_to: any, _from: any, next: any) => {
       // Verifica si el usuario tiene sesión abierta

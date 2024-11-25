@@ -26,6 +26,23 @@
                 <label for="footerColor">Color de Footer:</label>
                 <input type="color" id="footerColor" v-model="colors.footerColor" class="form-control">
             </div>
+            <div class="row">
+                <div class="col-sm form-group mb-3">
+                    <label for="fontFile">Cargar fuente del titulo:</label>
+                    <input type="file" accept=".ttf" name="fontFile" id="fontFile" @change="handleFontFile"
+                        class="form-control">
+                </div>
+                <div class="col-sm form-group mb-3">
+                    <label for="fontFileParagraph">Cargar fuente del parrafo:</label>
+                    <input type="file" accept=".ttf" name="fontFileParagraph" id="fontFileParagraph"
+                        @change="handleParagraphFontFile" class="form-control">
+                </div>
+                <div class="col-sm form-group mb-3">
+                    <label for="fontSize">Actualizar tamaño de fuente:</label>
+                    <input type="number" name="fontSize" id="fontSize" v-model="fontSize" @change="e => console.log(e)"
+                        class="form-control">
+                </div>
+            </div>
             <button type="submit" class="btn btn-primary">Aplicar Colores</button>
         </form>
     </div>
@@ -41,9 +58,24 @@ export default {
                 backgroundColor: '#ffffff',
                 navbarColor: '#f8f9fa',
                 footerColor: '#f8f9fa',
-                linksColors: '#000000'
-            }
+                linksColors: '#000000',
+                fontFile: undefined,
+            },
+            fontSize: undefined
         };
+    },
+    watch: {
+        fontSize: {
+            handler: (val, oldVal) => {
+                if (val && val > 0) {
+                    let p = val;
+                    let title = val * 1.618;
+                    console.log(title)
+                    document.documentElement.style.setProperty('--fontSize-p', `${p}px`);
+                    document.documentElement.style.setProperty('--fontSize-t', `${title}px`);
+                }
+            }
+        }
     },
     methods: {
         applyColors() {
@@ -54,7 +86,51 @@ export default {
             document.documentElement.style.setProperty('--navbar-color', this.colors.navbarColor);
             document.documentElement.style.setProperty('--footer-color', this.colors.footerColor);
             document.documentElement.style.setProperty('--links-color', this.colors.linksColors);
-        }
+            if (this.fontFile) {
+                console.log(this.fontFile)
+            }
+        },
+        handleFontFile(event) {
+            const file = event.target.files[0];
+            if (file && file.type === "font/ttf") {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const fontFace = new FontFace('customFont', e.target.result);
+                    fontFace.load().then((loadedFontFace) => {
+                        document.fonts.add(loadedFontFace);
+                        document.documentElement.style.setProperty('--title-font', 'customFont');
+                    }).catch((error) => {
+                        console.error('Font loading failed:', error);
+                        document.documentElement.style.setProperty('--title-font', 'Arial');
+                    });
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                document.documentElement.style.setProperty('--title-font', 'Arial');
+            }
+        },
+        handleParagraphFontFile(event) {
+            const file = event.target.files[0];
+            if (file && file.type === "font/ttf") {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const fontFace = new FontFace('customFont', e.target.result);
+                    fontFace.load().then((loadedFontFace) => {
+                        document.fonts.add(loadedFontFace);
+                        document.documentElement.style.setProperty('--paragraph-font', 'customFont');
+                    }).catch((error) => {
+                        console.error('Font loading failed:', error);
+                        document.documentElement.style.setProperty('--paragraph-font', 'Arial');
+                    });
+                };
+                reader.readAsArrayBuffer(file);
+            } else {
+                document.documentElement.style.setProperty('--paragraph-font', 'Arial');
+            }
+        },
+        handleFontSize(size) {
+            console.log(size.target);
+        },
     }
 };
 </script>
@@ -67,6 +143,11 @@ export default {
     --background-color: #ffffff;
     --navbar-color: #f8f9fa;
     --footer-color: #f8f9fa;
+    --title-font: Arial;
+    --paragraph-font: Arial;
+    --fontSize-p: 16px;
+    --fontSize-t: 40px;
+
 }
 
 body {
@@ -80,16 +161,21 @@ h4,
 h5,
 h6 {
     color: var(--title-color) !important;
+    font-family: var(--title-font);
+    font-size: var(--fontSize-t) !important;
 }
 
 p,
 span,
 label {
     color: var(--paragraph-color) !important;
+    font-size: var(--fontSize-p) !important;
+    font-family: var(--paragraph-font);
 }
 
 a {
     color: var(--links-color) !important;
+    font-family: var(--fontSize-p);
 }
 
 #nav-color {

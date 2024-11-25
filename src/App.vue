@@ -27,6 +27,9 @@
             <router-link to="/colors" class="nav-link active" aria-current="page">Personalización de
               colores</router-link>
           </li>
+          <li v-if="user?.id">
+            <router-link to="/tangram" class="nav-link active" aria-current="page">Tangram</router-link>
+          </li>
         </ul>
       </div>
       <a v-if="user?.id" @click="logout" href="#">Cerrar sesión</a>
