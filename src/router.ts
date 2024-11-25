@@ -87,6 +87,11 @@ const routes = [
     },
   },
   {
+    path: "/terms",
+    name: "Terms",
+    component: () => import("./views/Terms.vue"),
+  },
+  {
     path: "/tangram",
     name: "Tangram",
     component: Tangram,

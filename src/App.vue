@@ -27,8 +27,8 @@
             <router-link to="/colors" class="nav-link active" aria-current="page">Personalización de
               colores</router-link>
           </li>
-          <li v-if="user?.id">
-            <router-link to="/tangram" class="nav-link active" aria-current="page">Tangram</router-link>
+          <li>
+            <router-link to="/terms" class="nav-link active" aria-current="page">Términos y Condiciones</router-link>
           </li>
         </ul>
       </div>
@@ -139,8 +139,8 @@
             reserved.</span>
         </div>
         <div class="col-md-6 text-center text-md-end text-body">
-          <!--/*** This template is free as long as you keep the below author’s credit link/attribution link/backlink. ***/-->
-          <!--/*** If you'd like to use the template without the below author’s credit link/attribution link/backlink, ***/-->
+          <!--/*** This template is free as long as you keep the below author's credit link/attribution link/backlink. ***/-->
+          <!--/*** If you'd like to use the template without the below author's credit link/attribution link/backlink, ***/-->
           <!--/*** you can purchase the Credit Removal License from "https://htmlcodex.com/credit-removal". ***/-->
           Hecho por <a class="border-bottom" href="https://htmlcodex.com">Jose Pineda</a>
           también por <a class="border-bottom" href="https://themewagon.com">Alejandro Placencia</a>
