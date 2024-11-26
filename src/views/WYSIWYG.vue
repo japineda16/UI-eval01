@@ -1,204 +1,106 @@
 <template>
-    <div class="wysiwyg-container">
-        <!-- Toolbar -->
-        <div id="toolbar">
-            <!-- Texto -->
-            <span class="ql-formats">
-                <select class="ql-header">
-                    <option value="1">Título 1</option>
-                    <option value="2">Título 2</option>
-                    <option value="3">Título 3</option>
-                    <option selected>Normal</option>
-                </select>
-                <select class="ql-font">
-                    <option selected>Default</option>
-                    <option value="serif">Serif</option>
-                    <option value="monospace">Monospace</option>
-                </select>
-                <select class="ql-size">
-                    <option value="small">Pequeño</option>
-                    <option selected>Normal</option>
-                    <option value="large">Grande</option>
-                    <option value="huge">Muy Grande</option>
-                </select>
-            </span>
-
-            <!-- Formato -->
-            <span class="ql-formats">
-                <button class="ql-bold"></button>
-                <button class="ql-italic"></button>
-                <button class="ql-underline"></button>
-                <button class="ql-strike"></button>
-            </span>
-
-            <!-- Color -->
-            <span class="ql-formats">
-                <select class="ql-color"></select>
-                <select class="ql-background"></select>
-            </span>
-
-            <!-- Listas -->
-            <span class="ql-formats">
-                <button class="ql-list" value="ordered"></button>
-                <button class="ql-list" value="bullet"></button>
-                <select class="ql-align">
-                    <option selected></option>
-                    <option value="center"></option>
-                    <option value="right"></option>
-                    <option value="justify"></option>
-                </select>
-            </span>
-
-            <!-- Enlaces e imágenes -->
-            <span class="ql-formats">
-                <button class="ql-link"></button>
-                <button class="ql-image"></button>
-            </span>
-
-            <!-- Limpiar formato -->
-            <span class="ql-formats">
-                <button class="ql-clean"></button>
-            </span>
+    <div class="editor-page">
+        <div class="editor-header">
+            <div class="container">
+                <h1>Editor de Contenido</h1>
+                <p class="text-muted">Crea y edita tu contenido de forma visual</p>
+            </div>
         </div>
 
-        <!-- Editor -->
-        <div ref="editor"></div>
+        <div class="container mt-4">
+            <div class="editor-wrapper">
+                <div class="editor-sidebar">
+                    <div class="document-info">
+                        <i class="bi bi-file-text me-2"></i>
+                        <span>Documento sin título</span>
+                    </div>
+                    <div class="status-info">
+                        <span class="text-muted"><i class="bi bi-circle-fill me-1"></i> Guardado</span>
+                    </div>
+                </div>
 
-        <!-- Botones de acción -->
-        <div class="action-buttons mt-3">
-            <button class="btn btn-primary me-2" @click="saveContent">
-                <i class="bi bi-save me-1"></i>
-                Guardar
-            </button>
-            <button class="btn btn-outline-secondary" @click="clearContent">
-                <i class="bi bi-trash me-1"></i>
-                Limpiar
-            </button>
+                <div class="editor-content">
+                    <WYSIWYG @save="onSave" @change="onChange" />
+                </div>
+            </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount } from 'vue'
-import Quill from 'quill'
-import 'quill/dist/quill.snow.css'
-import { supabase } from '../utils/supabase'
+import WYSIWYG from '../components/WYSIWYG.vue'
 
-const props = defineProps({
-    initialContent: {
-        type: String,
-        default: ''
-    }
-})
-
-const emit = defineEmits(['save', 'change'])
-
-const editor = ref(null)
-let quill = null
-
-// Opciones del editor
-const editorOptions = {
-    theme: 'snow',
-    modules: {
-        toolbar: '#toolbar'
-    },
-    placeholder: 'Escribe algo asombroso...'
+const onSave = (content) => {
+    console.log('Contenido guardado:', content)
 }
 
-// Inicializar editor
-onMounted(() => {
-    quill = new Quill(editor.value, editorOptions)
-
-    // Establecer contenido inicial si existe
-    if (props.initialContent) {
-        quill.root.innerHTML = props.initialContent
-    }
-
-    // Escuchar cambios
-    quill.on('text-change', () => {
-        emit('change', quill.root.innerHTML)
-    })
-})
-
-// Limpiar al desmontar
-onBeforeUnmount(() => {
-    if (quill) {
-        quill.off('text-change')
-    }
-})
-
-// Guardar contenido
-const saveContent = async () => {
-    try {
-        const content = quill.root.innerHTML
-        const { data, error } = await supabase
-            .from('wysiwyg')
-            .insert([
-                { content: content }
-            ])
-
-        if (error) throw error
-
-        emit('save', content)
-        alert('Contenido guardado exitosamente')
-    } catch (error) {
-        console.error('Error al guardar:', error)
-        alert('Error al guardar el contenido')
-    }
+const onChange = (content) => {
+    console.log('Contenido modificado:', content)
 }
-
-// Limpiar contenido
-const clearContent = () => {
-    if (confirm('¿Estás seguro de que quieres limpiar todo el contenido?')) {
-        quill.setText('')
-    }
-}
-
-// Exponer métodos para el componente padre
-defineExpose({
-    getContent: () => quill?.root.innerHTML || '',
-    setContent: (content) => {
-        if (quill) {
-            quill.root.innerHTML = content
-        }
-    },
-    clearContent
-})
 </script>
 
-<style>
-.wysiwyg-container {
-    border: 1px solid #ccc;
-    border-radius: 4px;
+<style scoped>
+.editor-page {
+    min-height: 100vh;
+    background-color: #f0f2f5;
+}
+
+.editor-header {
     background: white;
+    padding: 2rem 0;
+    border-bottom: 1px solid #e2e4e7;
 }
 
-.ql-toolbar {
-    border-top: none !important;
-    border-left: none !important;
-    border-right: none !important;
-    border-bottom: 1px solid #ccc !important;
+.editor-header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 0.5rem;
 }
 
-.ql-container {
-    border: none !important;
-    height: 300px !important;
+.editor-wrapper {
+    display: grid;
+    grid-template-columns: 250px 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
 }
 
-.action-buttons {
+.editor-sidebar {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.editor-content {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     padding: 1rem;
-    border-top: 1px solid #ccc;
 }
 
-/* Estilos responsivos */
+.document-info {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #e2e4e7;
+}
+
+.status-info {
+    font-size: 0.9rem;
+}
+
+.status-info i {
+    font-size: 0.6rem;
+    color: #28a745;
+}
+
 @media (max-width: 768px) {
-    .ql-toolbar {
-        flex-wrap: wrap;
+    .editor-wrapper {
+        grid-template-columns: 1fr;
     }
 
-    .ql-formats {
-        margin-right: 0 !important;
-        margin-bottom: 5px;
+    .editor-sidebar {
+        margin-bottom: 1rem;
     }
 }
 </style>
