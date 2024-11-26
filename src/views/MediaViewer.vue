@@ -23,7 +23,7 @@
         <div class="content-viewer p-3">
             <template v-if="selectedFile">
                 <!-- Video Player -->
-                <VideoPlayer v-if="selectedFile.type === 'video'" :url="selectedFile.url"
+                <VideoPlayer v-if="selectedFile.type === 'video'" :videoUrl="selectedFile.url"
                     :subtitleUrl="selectedFile.subtitle_url" class="w-100" />
 
                 <!-- Audio Player -->
