@@ -23,7 +23,8 @@
         <div class="content-viewer p-3">
             <template v-if="selectedFile">
                 <!-- Video Player -->
-                <VideoPlayer v-if="selectedFile.type === 'video'" :url="selectedFile.url" class="w-100" />
+                <VideoPlayer v-if="selectedFile.type === 'video'" :url="selectedFile.url"
+                    :subtitleUrl="selectedFile.subtitle_url" class="w-100" />
 
                 <!-- Audio Player -->
                 <audio v-else-if="selectedFile.type === 'audio'" controls :src="selectedFile.url" class="w-100"></audio>
@@ -90,7 +91,8 @@ const loadInitialFiles = async () => {
         // Agregar URL pública a cada archivo
         files.value = data.map(file => ({
             ...file,
-            url: getPublicUrl(file.path)
+            url: getPublicUrl(file.path),
+            subtitle_url: getPublicUrl(file.subtitle_path)
         }))
 
         console.log(files.value)
