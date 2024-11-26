@@ -14,6 +14,12 @@
                 class="form-control" ref="fileInput">
         </div>
 
+        <div class="mb-3" v-if="selectedFileType === 'video'">
+            <label class="form-label">Subtítulos (opcional)</label>
+            <input type="file" accept=".vtt,.srt" @change="handleSubtitleUpload" class="form-control"
+                ref="subtitleInput">
+        </div>
+
         <div class="upload-form p-3 border-bottom">
             <!-- ... otros elementos ... -->
 
@@ -40,8 +46,10 @@ import { supabase } from '../utils/supabase';
 const selectedFileType = ref('')
 const selectedFile = ref(null)
 const fileInput = ref(null)
+const subtitleInput = ref(null)
 const loading = ref(false)
 const error = ref(null)
+const selectedSubtitle = ref(null)
 
 // Computed property para tipos de archivo aceptados
 const acceptedFileTypes = computed(() => {
@@ -75,6 +83,16 @@ const handleFileUpload = (event) => {
     }
 }
 
+const handleSubtitleUpload = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+        selectedSubtitle.value = {
+            name: file.name,
+            file: file
+        }
+    }
+}
+
 const handleSave = async () => {
     if (!isFormValid.value) return
 
@@ -102,6 +120,25 @@ const handleSave = async () => {
             .from('files')
             .getPublicUrl(filePath)
 
+        // Si hay subtítulos, subirlos también
+        let subtitlePath = null
+        if (selectedSubtitle.value) {
+            const subtitleFile = selectedSubtitle.value.file
+            const subtitleExt = subtitleFile.name.split('.').pop()
+            const subtitleName = `${Date.now()}_subtitle.${subtitleExt}`
+            const subtitleFilePath = `subtitles/${subtitleName}`
+
+            const { error: subtitleUploadError } = await supabase.storage
+                .from('uploads')
+                .upload(subtitleFilePath, subtitleFile, {
+                    cacheControl: '3600',
+                    upsert: false
+                })
+
+            if (subtitleUploadError) throw subtitleUploadError
+            subtitlePath = subtitleFilePath
+        }
+
         // 3. Crear registro en la tabla files
         const { data: fileData, error: dbError } = await supabase
             .from('files')
@@ -109,7 +146,8 @@ const handleSave = async () => {
                 {
                     type: selectedFileType.value,
                     file_name: file.name,
-                    path: filePath
+                    path: filePath,
+                    subtitle_path: subtitlePath
                 }
             ])
             .select()
@@ -128,6 +166,10 @@ const handleSave = async () => {
         selectedFile.value = null
         if (fileInput.value) {
             fileInput.value.value = ''
+        }
+        selectedSubtitle.value = null
+        if (subtitleInput.value) {
+            subtitleInput.value.value = ''
         }
 
     } catch (err) {

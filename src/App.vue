@@ -33,7 +33,7 @@
           <li v-if="user?.id">
             <router-link to="/media" class="nav-link active" aria-current="page">Archivos Multimedia</router-link>
           </li>
-          <li>
+          <li v-if="user?.id">
             <router-link to="/wysiwyg" class="nav-link active" aria-current="page">WYSIWYG</router-link>
           </li>
         </ul>
