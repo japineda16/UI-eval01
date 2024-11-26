@@ -1,231 +1,209 @@
 <template>
-    <div class="pdf-viewer">
-        <!-- Toolbar -->
-        <div class="toolbar bg-light border-bottom p-2 d-flex align-items-center gap-3">
-            <!-- Navegación -->
-            <div class="btn-group">
-                <button class="btn btn-outline-primary" @click="previousPage" :disabled="currentPage <= 1">
-                    <i class="fas fa-chevron-left"></i>
-                </button>
-                <button class="btn btn-outline-primary" @click="nextPage" :disabled="currentPage >= totalPages">
-                    <i class="fas fa-chevron-right"></i>
-                </button>
-            </div>
+    <div class="pdf-container">
+        <!-- Barra de herramientas -->
+        <div class="toolbar bg-light border-bottom p-3 sticky-top">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <!-- Navegación -->
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-outline-primary" @click="prevPage" :disabled="currentPage <= 1">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
 
-            <!-- Información de página -->
-            <div class="page-info d-flex align-items-center">
-                <span class="me-2">Página</span>
-                <input type="number" class="form-control form-control-sm" style="width: 70px"
-                    v-model.number="currentPage" :min="1" :max="totalPages" @change="handlePageChange">
-                <span class="ms-2">de {{ totalPages }}</span>
-            </div>
+                    <div class="input-group" style="width: auto;">
+                        <input type="number" class="form-control" style="width: 70px;" v-model.number="currentPage"
+                            :min="1" :max="totalPages" @change="goToPage">
+                        <span class="input-group-text">de {{ totalPages }}</span>
+                    </div>
 
-            <!-- Zoom -->
-            <div class="btn-group ms-auto">
-                <button class="btn btn-outline-secondary" @click="zoomOut" :disabled="scale <= 0.5">
-                    <i class="fas fa-search-minus"></i>
-                </button>
-                <button class="btn btn-outline-secondary" @click="resetZoom">
-                    {{ Math.round(scale * 100) }}%
-                </button>
-                <button class="btn btn-outline-secondary" @click="zoomIn" :disabled="scale >= 3">
-                    <i class="fas fa-search-plus"></i>
-                </button>
+                    <button class="btn btn-outline-primary" @click="nextPage" :disabled="currentPage >= totalPages">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+
+                <!-- Zoom -->
+                <div class="btn-group">
+                    <button class="btn btn-outline-secondary" @click="zoomOut" :disabled="scale <= 0.5">
+                        <i class="bi bi-zoom-out"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary" @click="resetZoom">
+                        {{ Math.round(scale * 100) }}%
+                    </button>
+                    <button class="btn btn-outline-secondary" @click="zoomIn" :disabled="scale >= 2">
+                        <i class="bi bi-zoom-in"></i>
+                    </button>
+                </div>
             </div>
         </div>
 
-        <!-- Contenedor del PDF -->
-        <div class="pdf-container p-3" ref="containerRef">
-            <!-- Loading -->
-            <div v-if="loading" class="text-center p-5">
+        <!-- Área de visualización -->
+        <div class="pdf-content p-3 bg-light">
+            <!-- Loader -->
+            <div v-if="loading" class="text-center py-5">
                 <div class="spinner-border text-primary" role="status">
                     <span class="visually-hidden">Cargando...</span>
                 </div>
-                <p class="mt-2">Cargando PDF...</p>
+                <p class="mt-3 text-muted">Cargando PDF...</p>
             </div>
 
             <!-- Error -->
-            <div v-if="error" class="alert alert-danger" role="alert">
-                <i class="fas fa-exclamation-triangle me-2"></i>
+            <div v-if="error" class="alert alert-danger mx-auto" style="max-width: 500px;">
+                <i class="bi bi-exclamation-triangle me-2"></i>
                 {{ error }}
             </div>
 
-            <!-- Canvas -->
-            <canvas v-show="!loading && !error" ref="pdfCanvas" class="shadow-sm"></canvas>
+            <!-- PDF Canvas -->
+            <canvas ref="pdfCanvas" v-show="!loading && !error" class="mx-auto d-block shadow-sm bg-white"></canvas>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, nextTick } from 'vue'
-import * as pdfjsLib from 'pdfjs-dist'
+import { onMounted, watch, shallowRef } from 'vue';
+import * as pdfjsLib from 'pdfjs-dist';
 
-// Configurar worker de PDF.js
-pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.8.69/pdf.min.mjs`
+// Configurar worker usando CDN
+pdfjsLib.GlobalWorkerOptions.workerSrc = `https://unpkg.com/pdfjs-dist@4.8.69/build/pdf.worker.min.mjs`;
 
 const props = defineProps({
-    fileUrl: {
+    url: {
         type: String,
         required: true
     }
-})
+});
 
 // Referencias y estado
-const pdfCanvas = ref(null)
-const containerRef = ref(null)
-const loading = ref(true)
-const error = ref(null)
-const pdfDoc = ref(null)
-const currentPage = ref(1)
-const totalPages = ref(0)
-const scale = ref(1)
+const pdfCanvas = shallowRef(null);
+const pdfDoc = shallowRef(null);
+const currentPage = shallowRef(1);
+const totalPages = shallowRef(0);
+const scale = shallowRef(1);
+const loading = shallowRef(true);
+const error = shallowRef(null);
 
-// Cargar PDF
-const loadPDF = async () => {
+// Cargar documento PDF
+const loadDocument = async () => {
+    console.log('Iniciando carga del PDF:', props.url);
     try {
-        if (!props.fileUrl) {
-            error.value = 'URL del PDF no proporcionada'
-            return
-        }
+        loading.value = true;
+        error.value = null;
 
-        loading.value = true
-        error.value = null
-        currentPage.value = 1
-        scale.value = 1
+        // Cargar el documento
+        const loadingTask = pdfjsLib.getDocument({
+            url: props.url,
+            disableFontFace: true
+        });
 
-        // Limpiar el canvas anterior si existe
-        if (pdfDoc.value) {
-            pdfDoc.value = null
-            if (pdfCanvas.value) {
-                const context = pdfCanvas.value.getContext('2d')
-                context.clearRect(0, 0, pdfCanvas.value.width, pdfCanvas.value.height)
-            }
-        }
+        console.log('Esperando carga del documento...');
+        pdfDoc.value = await loadingTask.promise;
+        console.log('Documento cargado');
 
-        const loadingTask = pdfjsLib.getDocument(props.fileUrl)
-        pdfDoc.value = await loadingTask.promise
-        totalPages.value = pdfDoc.value.numPages
+        totalPages.value = pdfDoc.value.numPages;
+        currentPage.value = 1;
 
-        await renderPage()
+        await renderPage();
     } catch (err) {
-        error.value = `Error al cargar el PDF: ${err.message}`
-        console.error('Error loading PDF:', err)
+        console.error('Error al cargar el PDF:', err);
+        error.value = `Error al cargar el PDF: ${err.message}`;
     } finally {
-        loading.value = false
+        loading.value = false;
     }
-}
+};
 
 // Renderizar página
 const renderPage = async () => {
-    if (!pdfDoc.value || !pdfCanvas.value) return
+    if (!pdfDoc.value || !pdfCanvas.value) return;
 
     try {
-        const page = await pdfDoc.value.getPage(currentPage.value)
-        const canvas = pdfCanvas.value
-        const context = canvas.getContext('2d')
+        console.log('Renderizando página:', currentPage.value);
+        const page = await pdfDoc.value.getPage(currentPage.value);
+        const canvas = pdfCanvas.value;
+        const context = canvas.getContext('2d');
 
-        const viewport = page.getViewport({ scale: scale.value })
-        canvas.height = viewport.height
-        canvas.width = viewport.width
+        const viewport = page.getViewport({ scale: scale.value });
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
 
         // Limpiar el canvas antes de renderizar
-        context.clearRect(0, 0, canvas.width, canvas.height)
+        context.clearRect(0, 0, canvas.width, canvas.height);
 
-        await page.render({
+        const renderContext = {
             canvasContext: context,
             viewport: viewport
-        }).promise
+        };
+
+        await page.render(renderContext).promise;
+        console.log('Página renderizada');
     } catch (err) {
-        error.value = `Error al renderizar la página: ${err.message}`
-        console.error('Error rendering page:', err)
+        console.error('Error al renderizar página:', err);
+        error.value = `Error al mostrar la página: ${err.message}`;
     }
-}
+};
 
 // Navegación
 const nextPage = () => {
     if (currentPage.value < totalPages.value) {
-        currentPage.value++
+        currentPage.value++;
     }
-}
+};
 
-const previousPage = () => {
+const prevPage = () => {
     if (currentPage.value > 1) {
-        currentPage.value--
+        currentPage.value--;
     }
-}
+};
 
-const handlePageChange = () => {
-    if (currentPage.value < 1) currentPage.value = 1
-    if (currentPage.value > totalPages.value) currentPage.value = totalPages.value
-    renderPage()
-}
+const goToPage = () => {
+    if (currentPage.value < 1) currentPage.value = 1;
+    if (currentPage.value > totalPages.value) currentPage.value = totalPages.value;
+};
 
 // Zoom
 const zoomIn = () => {
-    scale.value = Math.min(scale.value + 0.25, 3)
-}
+    scale.value = Math.min(scale.value + 0.25, 2);
+};
 
 const zoomOut = () => {
-    scale.value = Math.max(scale.value - 0.25, 0.5)
-}
+    scale.value = Math.max(scale.value - 0.25, 0.5);
+};
 
 const resetZoom = () => {
-    scale.value = 1
-}
+    scale.value = 1;
+};
 
 // Watchers
-watch(() => props.fileUrl, async (newUrl, oldUrl) => {
-    if (newUrl !== oldUrl) {
-        await loadPDF()
-    }
-})
-
-watch(currentPage, renderPage)
-watch(scale, renderPage)
+watch(() => props.url, loadDocument);
+watch(currentPage, renderPage);
+watch(scale, renderPage);
 
 // Inicialización
-onMounted(async () => {
-    await loadPDF()
-})
+onMounted(loadDocument);
 </script>
 
 <style scoped>
-.pdf-viewer {
+.pdf-container {
     height: 100%;
     display: flex;
     flex-direction: column;
-    background-color: #f8f9fa;
 }
 
-.pdf-container {
+.pdf-content {
     flex: 1;
-    overflow: auto;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 canvas {
-    background-color: white;
-    margin: auto;
     max-width: 100%;
+    height: auto !important;
 }
 
 .toolbar {
-    position: sticky;
-    top: 0;
     z-index: 1000;
 }
 
-@media (max-width: 768px) {
-    .toolbar {
-        flex-wrap: wrap;
-        gap: 1rem !important;
-    }
-
-    .page-info {
-        width: 100%;
-        justify-content: center;
+@media (max-width: 576px) {
+    .toolbar .d-flex {
+        justify-content: center !important;
     }
 }
 </style>

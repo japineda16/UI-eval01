@@ -43,7 +43,7 @@
                 <audio v-else-if="selectedFile.type === 'audio'" controls :src="selectedFile.url" class="w-100"></audio>
 
                 <!-- PDF Viewer -->
-                <PdfViewer v-else-if="selectedFile.type === 'pdf'" :fileUrl="selectedFile.url" class="h-100 w-100" />
+                <PdfViewer v-else-if="selectedFile.type === 'pdf'" :url="selectedFile.url" class="h-100 w-100" />
 
                 <!-- Mensaje de tipo no soportado -->
                 <div v-else class="alert alert-warning">
@@ -100,61 +100,61 @@ const files = ref([
         id: 3,
         name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
+        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
     },
     {
         id: 4,
         name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
+        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
     },
     {
         id: 5,
         name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
+        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
     },
     {
         id: 6,
         name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
+        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
     },
     {
         id: 7,
         name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
+        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
     },
     {
         id: 8,
         name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
+        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
     },
     {
         id: 9,
         name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
+        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
     },
     {
         id: 10,
         name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
+        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
     },
     {
         id: 11,
         name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
+        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
     },
     {
         id: 12,
         name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
+        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
     }
 ])
 
