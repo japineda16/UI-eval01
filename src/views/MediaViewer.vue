@@ -18,16 +18,7 @@
         <div class="content-viewer">
             <template v-if="selectedFile">
                 <!-- Video Player -->
-                <video ref="videoPlayer" class="video-js vjs-default-skin" controls preload="auto" width="640"
-                    height="360" v-if="selectedFile.type === 'video'">
-                    <source :src="'https://www.w3schools.com/html/mov_bbb.mp4'" type="video/mp4">
-                    <track v-if="selectedFile.subtitles" kind="subtitles" :src="selectedFile.subtitles" srclang="es"
-                        label="Español">
-                    <p class="vjs-no-js">
-                        Para ver este video, por favor habilite JavaScript y considere actualizar a un
-                        navegador web que soporte video HTML5
-                    </p>
-                </video>
+                <VideoPlayer v-if="selectedFile.type === 'video'" :url="'https://www.w3schools.com/html/mov_bbb.mp4'" />
 
                 <!-- Audio Player -->
                 <audio v-else-if="selectedFile.type === 'audio'" controls :src="selectedFile.url"></audio>
@@ -51,61 +42,8 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
-import videojs from 'video.js'
-import 'video.js/dist/video-js.css'
-
-
-
-const selectedFile = ref(null)
-const videoPlayer = ref(null)
-let player = null
-
-// Inicializar Video.js
-const initializePlayer = () => {
-    if (videoPlayer.value) {
-        player = videojs(videoPlayer.value, {
-            controls: true,
-            fluid: true,
-            playbackRates: [0.5, 1, 1.5, 2],
-            controlBar: {
-                children: [
-                    'playToggle',
-                    'volumePanel',
-                    'currentTimeDisplay',
-                    'timeDivider',
-                    'durationDisplay',
-                    'progressControl',
-                    'playbackRateMenuButton',
-                    'subtitlesButton',
-                    'fullscreenToggle',
-                ],
-            },
-        })
-    }
-}
-
-// Limpiar el reproductor cuando el componente se desmonte
-onBeforeUnmount(() => {
-    if (player) {
-        player.dispose()
-    }
-})
-
-// Observar cambios en el archivo seleccionado
-watch(selectedFile, (newFile) => {
-    if (player) {
-        player.dispose()
-    }
-    if (newFile?.type === 'video') {
-        nextTick(() => {
-            initializePlayer()
-        })
-    }
-})
-
-
-
+import { ref } from 'vue'
+import VideoPlayer from '../components/VideoPlayer.vue'
 
 // Datos de prueba
 const files = ref([
@@ -113,7 +51,7 @@ const files = ref([
         id: 1,
         name: 'Video de prueba',
         type: 'video',
-        url: 'https://example.com/video.mp4'
+        url: 'https://www.w3schools.com/html/mov_bbb.mp4'
     },
     {
         id: 2,
@@ -201,6 +139,8 @@ const files = ref([
     }
 ])
 
+const selectedFile = ref(null)
+
 // Métodos
 const selectFile = (file) => {
     selectedFile.value = file
@@ -221,26 +161,6 @@ const getFileIcon = (type) => {
 </script>
 
 <style scoped>
-.video-container {
-    width: 100%;
-    max-width: 1000px;
-    margin: 0 auto;
-}
-
-:deep(.video-js) {
-    width: 100%;
-    height: 0;
-    padding-top: 56.25%;
-    /* Aspect ratio 16:9 */
-}
-
-:deep(.video-js.vjs-fluid) {
-    padding-top: 56.25%;
-    width: 100%;
-    max-width: 100%;
-    height: auto;
-}
-
 .media-viewer {
     display: flex;
     height: 100vh;
