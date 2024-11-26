@@ -43,8 +43,7 @@
                 <audio v-else-if="selectedFile.type === 'audio'" controls :src="selectedFile.url" class="w-100"></audio>
 
                 <!-- PDF Viewer -->
-                <iframe v-else-if="selectedFile.type === 'pdf'" :src="selectedFile.url"
-                    class="w-100 h-100 border-0"></iframe>
+                <PdfViewer v-else-if="selectedFile.type === 'pdf'" :fileUrl="selectedFile.url" class="h-100 w-100" />
 
                 <!-- Mensaje de tipo no soportado -->
                 <div v-else class="alert alert-warning">
@@ -64,6 +63,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import VideoPlayer from '../components/VideoPlayer.vue'
+import PdfViewer from '../components/PdfReader.vue'
 
 const selectedFileType = ref('')
 const selectedFile = ref(null)
@@ -104,75 +104,57 @@ const files = ref([
     },
     {
         id: 4,
-        name: 'pdfn de prueba',
+        name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://example.com/pdf.jpg'
+        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
     },
     {
         id: 5,
-        name: 'Documento de pdfo',
+        name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://example.com/pdf.txt'
+        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
     },
     {
         id: 6,
-        name: 'Documento de pdf',
+        name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://example.com/pdf.xlsx'
+        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
     },
     {
         id: 7,
-        name: 'Documento de pdf',
+        name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://example.com/pdf.docx'
+        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
     },
     {
         id: 8,
-        name: 'Documento de PowerPoint',
-        type: 'powerpoint',
-        url: 'https://example.com/powerpoint.pptx'
+        name: 'Documento PDF',
+        type: 'pdf',
+        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
     },
     {
         id: 9,
-        name: 'Documento de pdf',
+        name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://example.com/pdf.xlsx'
+        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
     },
     {
         id: 10,
-        name: 'Documento de pdf',
+        name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://example.com/pdf.docx'
+        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
     },
     {
         id: 11,
-        name: 'Documento de PowerPoint',
-        type: 'powerpoint',
-        url: 'https://example.com/powerpoint.pptx'
+        name: 'Documento PDF',
+        type: 'pdf',
+        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
     },
     {
         id: 12,
-        name: 'Documento de pdf',
+        name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://example.com/pdf.xlsx'
-    },
-    {
-        id: 13,
-        name: 'Documento de pdf',
-        type: 'pdf',
-        url: 'https://example.com/pdf.docx'
-    },
-    {
-        id: 14,
-        name: 'Documento de PowerPoint',
-        type: 'powerpoint',
-        url: 'https://example.com/powerpoint.pptx'
-    },
-    {
-        id: 15,
-        name: 'Documento de pdf',
-        type: 'pdf',
-        url: 'https://example.com/pdf.xlsx'
+        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
     }
 ])
 
