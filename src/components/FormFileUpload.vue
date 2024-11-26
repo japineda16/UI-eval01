@@ -11,13 +11,37 @@
 
         <div class="mb-3">
             <input type="file" :accept="acceptedFileTypes" :disabled="!selectedFileType" @change="handleFileUpload"
-                class="form-control">
+                class="form-control" ref="fileInput">
+        </div>
+
+        <div class="upload-form p-3 border-bottom">
+            <!-- ... otros elementos ... -->
+
+            <!-- Mensaje de error -->
+            <div v-if="error" class="alert alert-danger mt-3">
+                {{ error }}
+            </div>
+
+            <!-- Botón de guardar -->
+            <div class="d-grid">
+                <button class="btn btn-primary" @click="handleSave" :disabled="!isFormValid || loading">
+                    <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status"></span>
+                    <i v-else class="bi bi-save me-2"></i>
+                    {{ loading ? 'Guardando...' : 'Guardar' }}
+                </button>
+            </div>
         </div>
     </div>
 </template>
 <script setup>
 import { ref, computed } from 'vue'
+import { supabase } from '../utils/supabase';
+
 const selectedFileType = ref('')
+const selectedFile = ref(null)
+const fileInput = ref(null)
+const loading = ref(false)
+const error = ref(null)
 
 // Computed property para tipos de archivo aceptados
 const acceptedFileTypes = computed(() => {
@@ -33,20 +57,94 @@ const acceptedFileTypes = computed(() => {
     }
 })
 
+// Computed property para validar el formulario
+const isFormValid = computed(() => {
+    return selectedFileType.value && selectedFile.value
+})
+
 const handleFileUpload = (event) => {
     const file = event.target.files[0]
     if (file) {
-        const newFile = {
-            id: Date.now(), // Usar timestamp como ID temporal
+        selectedFile.value = {
+            id: Date.now(),
             name: file.name,
             type: selectedFileType.value,
+            file: file,
             url: URL.createObjectURL(file)
         }
-        files.value.unshift(newFile)
-        selectedFile.value = newFile // Seleccionar automáticamente el nuevo archivo
-        event.target.value = '' // Limpiar el input
     }
 }
 
+const handleSave = async () => {
+    if (!isFormValid.value) return
 
+    loading.value = true
+    error.value = null
+
+    try {
+        const file = selectedFile.value.file
+        const fileExt = file.name.split('.').pop()
+        const fileName = `${Date.now()}.${fileExt}`
+        const filePath = `${selectedFileType.value}/${fileName}`
+
+        // 1. Subir archivo al bucket
+        const { data: uploadData, error: uploadError } = await supabase.storage
+            .from('uploads') // Nombre de tu bucket
+            .upload(filePath, file, {
+                cacheControl: '3600',
+                upsert: false
+            })
+
+        if (uploadError) throw uploadError
+
+        // 2. Obtener la URL pública del archivo
+        const { data: { publicUrl } } = supabase.storage
+            .from('files')
+            .getPublicUrl(filePath)
+
+        // 3. Crear registro en la tabla files
+        const { data: fileData, error: dbError } = await supabase
+            .from('files')
+            .insert([
+                {
+                    type: selectedFileType.value,
+                    file_name: file.name,
+                    path: filePath
+                }
+            ])
+            .select()
+            .single()
+
+        if (dbError) throw dbError
+
+        // 4. Emitir evento con la información completa
+        emit('save', {
+            ...fileData,
+            url: publicUrl
+        })
+
+        // 5. Limpiar el formulario
+        selectedFileType.value = ''
+        selectedFile.value = null
+        if (fileInput.value) {
+            fileInput.value.value = ''
+        }
+
+    } catch (err) {
+        console.error('Error al guardar:', err)
+        error.value = err.message
+    } finally {
+        loading.value = false
+    }
+}
+
+// Definir los eventos que emitirá el componente
+const emit = defineEmits(['save'])
 </script>
+
+<style scoped>
+.upload-form {
+    max-width: 500px;
+    margin: 0 auto;
+}
+</style>
