@@ -2,6 +2,7 @@
     <div class="video-container">
         <video ref="videoPlayer" class="video-js vjs-default-skin vjs-big-play-centered">
             <source :src="videoPlayer">
+            <track v-if="subtitleUrl" kind="subtitles" :src="subtitleUrl" label="Español" srclang="es" default>
             <p class="vjs-no-js">
                 Para ver este video, por favor habilite JavaScript y considere actualizar
                 a un navegador web que soporte video HTML5
@@ -19,6 +20,10 @@ const props = defineProps({
     url: {
         type: String,
         default: 'https://www.w3schools.com/html/mov_bbb.mp4',
+    },
+    subtitleUrl: {
+        type: String,
+        default: '',
     }
 })
 
@@ -40,6 +45,7 @@ const initializePlayer = () => {
                     'durationDisplay',
                     'progressControl',
                     'playbackRateMenuButton',
+                    'subtitlesButton',
                     'fullscreenToggle',
                 ],
             },
@@ -64,6 +70,27 @@ onBeforeUnmount(() => {
 watch(() => props.url, (newUrl) => {
     if (player) {
         player.src({ src: newUrl })
+    }
+})
+
+// Observar cambios en la URL de los subtítulos
+watch(() => props.subtitleUrl, (newSubtitleUrl) => {
+    if (player && newSubtitleUrl) {
+        // Remover tracks existentes
+        const tracks = player.remoteTextTracks();
+        const trackCount = tracks.length;
+        for (let i = 0; i < trackCount; i++) {
+            player.removeRemoteTextTrack(tracks[0]);
+        }
+
+        // Agregar nuevo track
+        player.addRemoteTextTrack({
+            kind: 'subtitles',
+            src: newSubtitleUrl,
+            srclang: 'es',
+            label: 'Español',
+            default: true
+        }, false);
     }
 })
 </script>
