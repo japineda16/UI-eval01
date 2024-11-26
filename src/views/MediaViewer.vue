@@ -47,92 +47,21 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { supabase } from '../utils/supabase';
 import VideoPlayer from '../components/VideoPlayer.vue'
 import PdfViewer from '../components/PdfReader.vue'
 import FormFileUpload from '../components/FormFileUpload.vue'
 
 const selectedFile = ref(null)
+const files = ref([])
 
-// Datos de prueba
-const files = ref([
-    {
-        id: 1,
-        name: 'Video de prueba',
-        type: 'video',
-        url: 'https://www.w3schools.com/html/mov_bbb.mp4'
-    },
-    {
-        id: 2,
-        name: 'Audio de muestra',
-        type: 'audio',
-        url: 'https://example.com/audio.mp3'
-    },
-    {
-        id: 3,
-        name: 'Documento PDF',
-        type: 'pdf',
-        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
-    },
-    {
-        id: 4,
-        name: 'Documento PDF',
-        type: 'pdf',
-        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
-    },
-    {
-        id: 5,
-        name: 'Documento PDF',
-        type: 'pdf',
-        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
-    },
-    {
-        id: 6,
-        name: 'Documento PDF',
-        type: 'pdf',
-        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
-    },
-    {
-        id: 7,
-        name: 'Documento PDF',
-        type: 'pdf',
-        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
-    },
-    {
-        id: 8,
-        name: 'Documento PDF',
-        type: 'pdf',
-        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
-    },
-    {
-        id: 9,
-        name: 'Documento PDF',
-        type: 'pdf',
-        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
-    },
-    {
-        id: 10,
-        name: 'Documento PDF',
-        type: 'pdf',
-        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
-    },
-    {
-        id: 11,
-        name: 'Documento PDF',
-        type: 'pdf',
-        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
-    },
-    {
-        id: 12,
-        name: 'Documento PDF',
-        type: 'pdf',
-        url: 'https://raw.githubusercontent.com/mozilla/pdf.js/ba2edeae/web/compressed.tracemonkey-pldi-09.pdf'
-    }
-])
-
-// Métodos
-const selectFile = (file) => {
-    selectedFile.value = file
+// Función para obtener la URL pública del archivo
+const getPublicUrl = (path) => {
+    const { data: { publicUrl } } = supabase.storage
+        .from('uploads')
+        .getPublicUrl(path)
+    return publicUrl
 }
 
 const getFileIcon = (type) => {
@@ -148,7 +77,96 @@ const getFileIcon = (type) => {
     }
 }
 
+// Función para cargar archivos iniciales
+const loadInitialFiles = async () => {
+    try {
+        const { data, error } = await supabase
+            .from('files')
+            .select('*')
+            .order('created_at', { ascending: false })
 
+        if (error) throw error
+
+        // Agregar URL pública a cada archivo
+        files.value = data.map(file => ({
+            ...file,
+            url: getPublicUrl(file.path)
+        }))
+
+        console.log(files.value)
+
+    } catch (error) {
+        console.error('Error al cargar archivos:', error)
+    }
+}
+
+// Función para suscribirse a cambios en tiempo real
+const subscribeToFiles = () => {
+    const subscription = supabase
+        .channel('files_channel')
+        .on('postgres_changes',
+            {
+                event: '*', // Escucha todos los eventos (INSERT, UPDATE, DELETE)
+                schema: 'public',
+                table: 'files'
+            },
+            async (payload) => {
+                console.log('Cambio detectado:', payload)
+
+                // Manejar inserción de nuevo archivo
+                if (payload.eventType === 'INSERT') {
+                    const newFile = {
+                        ...payload.new,
+                        url: getPublicUrl(payload.new.path)
+                    }
+                    files.value = [newFile, ...files.value]
+                }
+
+                // Manejar actualización de archivo
+                else if (payload.eventType === 'UPDATE') {
+                    const index = files.value.findIndex(f => f.id === payload.new.id)
+                    if (index !== -1) {
+                        files.value[index] = {
+                            ...payload.new,
+                            url: getPublicUrl(payload.new.path)
+                        }
+                    }
+                }
+
+                // Manejar eliminación de archivo
+                else if (payload.eventType === 'DELETE') {
+                    files.value = files.value.filter(f => f.id !== payload.old.id)
+                }
+            }
+        )
+        .subscribe()
+
+    return subscription
+}
+
+// Variable para almacenar la suscripción
+let subscription
+
+// Inicializar al montar el componente
+onMounted(async () => {
+    // Cargar archivos existentes
+    await loadInitialFiles()
+
+    // Suscribirse a cambios
+    subscription = subscribeToFiles()
+})
+
+// Limpiar suscripción al desmontar
+onUnmounted(() => {
+    if (subscription) {
+        supabase.removeChannel(subscription)
+    }
+})
+
+// Función para seleccionar archivo
+const selectFile = (file) => {
+    selectedFile.value = file
+}
 </script>
 
 <style scoped>
