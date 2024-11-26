@@ -1,49 +1,86 @@
 <template>
     <div class="media-viewer">
-        <!-- Lista de archivos (panel izquierdo) -->
-        <div class="file-list">
-            <div v-for="file in files" :key="file.id" class="file-item"
-                :class="{ active: selectedFile?.id === file.id }" @click="selectFile(file)">
-                <div class="file-icon">
-                    <i :class="getFileIcon(file.type)"></i>
+        <div class="file-list bg-light border-end">
+            <!-- Formulario de subida -->
+            <div class="upload-form p-3 border-bottom">
+                <div class="mb-3">
+                    <select v-model="selectedFileType" class="form-select" aria-label="Selecciona tipo de archivo">
+                        <option value="">Selecciona tipo de archivo</option>
+                        <option value="video">Video</option>
+                        <option value="audio">Audio</option>
+                        <option value="pdf">PDF</option>
+                    </select>
                 </div>
-                <div class="file-info">
-                    <div class="file-name">{{ file.name }}</div>
-                    <div class="file-type">{{ file.type }}</div>
+
+                <div class="mb-3">
+                    <input type="file" :accept="acceptedFileTypes" :disabled="!selectedFileType"
+                        @change="handleFileUpload" class="form-control">
+                </div>
+            </div>
+
+            <!-- Lista de archivos -->
+            <div class="file-list-content">
+                <div v-for="file in files" :key="file.id" class="file-item p-3 border-bottom d-flex align-items-center"
+                    :class="{ 'active bg-primary pdf-white': selectedFile?.id === file.id }" @click="selectFile(file)">
+                    <div class="file-icon me-3">
+                        <i :class="getFileIcon(file.type)"></i>
+                    </div>
+                    <div class="file-info">
+                        <div class="file-name fw-bold">{{ file.name }}</div>
+                        <div class="file-type small">{{ file.type }}</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Visor de contenido (panel derecho) -->
-        <div class="content-viewer">
+        <!-- Visor de contenido -->
+        <div class="content-viewer p-3">
             <template v-if="selectedFile">
                 <!-- Video Player -->
-                <VideoPlayer v-if="selectedFile.type === 'video'" :url="'https://www.w3schools.com/html/mov_bbb.mp4'" />
+                <VideoPlayer v-if="selectedFile.type === 'video'" :url="selectedFile.url" class="w-100" />
 
                 <!-- Audio Player -->
-                <audio v-else-if="selectedFile.type === 'audio'" controls :src="selectedFile.url"></audio>
+                <audio v-else-if="selectedFile.type === 'audio'" controls :src="selectedFile.url" class="w-100"></audio>
 
                 <!-- PDF Viewer -->
-                <iframe v-else-if="selectedFile.type === 'pdf'" :src="selectedFile.url" width="100%"
-                    height="100%"></iframe>
+                <iframe v-else-if="selectedFile.type === 'pdf'" :src="selectedFile.url"
+                    class="w-100 h-100 border-0"></iframe>
 
                 <!-- Mensaje de tipo no soportado -->
-                <div v-else class="unsupported">
+                <div v-else class="alert alert-warning">
                     Formato no soportado
                 </div>
             </template>
 
             <!-- Mensaje cuando no hay archivo seleccionado -->
-            <div v-else class="no-selection">
-                Selecciona un archivo para visualizar
+            <div v-else class="pdf-center pdf-muted">
+                <i class="fas fa-file fa-3x mb-3"></i>
+                <p>Selecciona un archivo para visualizar</p>
             </div>
         </div>
     </div>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import VideoPlayer from '../components/VideoPlayer.vue'
+
+const selectedFileType = ref('')
+const selectedFile = ref(null)
+
+// Computed property para tipos de archivo aceptados
+const acceptedFileTypes = computed(() => {
+    switch (selectedFileType.value) {
+        case 'video':
+            return 'video/*'
+        case 'audio':
+            return 'audio/*'
+        case 'pdf':
+            return 'application/pdf'
+        default:
+            return ''
+    }
+})
 
 // Datos de prueba
 const files = ref([
@@ -63,31 +100,31 @@ const files = ref([
         id: 3,
         name: 'Documento PDF',
         type: 'pdf',
-        url: 'https://example.com/document.pdf'
+        url: 'https://back.erp.erp.inflalo.com/uploads/CATALOGO_INFLALO_PUBLICITARIO_NOVIEMBRE_2024_dc81a00541.pdf'
     },
     {
         id: 4,
-        name: 'Imagen de prueba',
-        type: 'image',
-        url: 'https://example.com/image.jpg'
+        name: 'pdfn de prueba',
+        type: 'pdf',
+        url: 'https://example.com/pdf.jpg'
     },
     {
         id: 5,
-        name: 'Documento de texto',
-        type: 'text',
-        url: 'https://example.com/text.txt'
+        name: 'Documento de pdfo',
+        type: 'pdf',
+        url: 'https://example.com/pdf.txt'
     },
     {
         id: 6,
-        name: 'Documento de Excel',
-        type: 'excel',
-        url: 'https://example.com/excel.xlsx'
+        name: 'Documento de pdf',
+        type: 'pdf',
+        url: 'https://example.com/pdf.xlsx'
     },
     {
         id: 7,
-        name: 'Documento de Word',
-        type: 'word',
-        url: 'https://example.com/word.docx'
+        name: 'Documento de pdf',
+        type: 'pdf',
+        url: 'https://example.com/pdf.docx'
     },
     {
         id: 8,
@@ -97,15 +134,15 @@ const files = ref([
     },
     {
         id: 9,
-        name: 'Documento de Excel',
-        type: 'excel',
-        url: 'https://example.com/excel.xlsx'
+        name: 'Documento de pdf',
+        type: 'pdf',
+        url: 'https://example.com/pdf.xlsx'
     },
     {
         id: 10,
-        name: 'Documento de Word',
-        type: 'word',
-        url: 'https://example.com/word.docx'
+        name: 'Documento de pdf',
+        type: 'pdf',
+        url: 'https://example.com/pdf.docx'
     },
     {
         id: 11,
@@ -115,15 +152,15 @@ const files = ref([
     },
     {
         id: 12,
-        name: 'Documento de Excel',
-        type: 'excel',
-        url: 'https://example.com/excel.xlsx'
+        name: 'Documento de pdf',
+        type: 'pdf',
+        url: 'https://example.com/pdf.xlsx'
     },
     {
         id: 13,
-        name: 'Documento de Word',
-        type: 'word',
-        url: 'https://example.com/word.docx'
+        name: 'Documento de pdf',
+        type: 'pdf',
+        url: 'https://example.com/pdf.docx'
     },
     {
         id: 14,
@@ -133,13 +170,11 @@ const files = ref([
     },
     {
         id: 15,
-        name: 'Documento de Excel',
-        type: 'excel',
-        url: 'https://example.com/excel.xlsx'
+        name: 'Documento de pdf',
+        type: 'pdf',
+        url: 'https://example.com/pdf.xlsx'
     }
 ])
-
-const selectedFile = ref(null)
 
 // Métodos
 const selectFile = (file) => {
@@ -158,6 +193,21 @@ const getFileIcon = (type) => {
             return 'fas fa-file'
     }
 }
+
+const handleFileUpload = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+        const newFile = {
+            id: Date.now(), // Usar timestamp como ID temporal
+            name: file.name,
+            type: selectedFileType.value,
+            url: URL.createObjectURL(file)
+        }
+        files.value.unshift(newFile)
+        selectedFile.value = newFile // Seleccionar automáticamente el nuevo archivo
+        event.target.value = '' // Limpiar el input
+    }
+}
 </script>
 
 <style scoped>
@@ -167,46 +217,38 @@ const getFileIcon = (type) => {
 }
 
 .file-list {
-    width: 300px;
-    border-right: 1px solid #ddd;
+    width: 350px;
+    overflow-y: auto;
+}
+
+.file-list-content {
     overflow-y: auto;
 }
 
 .file-item {
-    display: flex;
-    padding: 1rem;
     cursor: pointer;
-    border-bottom: 1px solid #eee;
+    transition: background-color 0.2s;
 }
 
-.file-item:hover {
-    background-color: #f5f5f5;
-}
-
-.file-item.active {
-    background-color: #e3f2fd;
-}
-
-.file-icon {
-    margin-right: 1rem;
+.file-item:hover:not(.active) {
+    background-color: rgba(0, 0, 0, 0.05);
 }
 
 .content-viewer {
     flex: 1;
-    padding: 1rem;
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: #f8f9fa;
 }
 
-video,
+/* Asegurarse que el iframe del PDF ocupe todo el espacio disponible */
+.content-viewer iframe {
+    min-height: 80vh;
+}
+
+/* Estilos para el reproductor de audio */
 audio {
-    max-width: 100%;
-}
-
-.no-selection,
-.unsupported {
-    color: #666;
-    font-size: 1.2rem;
+    max-width: 500px;
 }
 </style>
