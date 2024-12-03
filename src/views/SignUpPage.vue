@@ -10,28 +10,28 @@
                                 <label for="email">Correo electrónico</label>
                                 <input type="email" class="form-control" id="email" v-model="email"
                                     @focus="startTiming('email')" @blur="() => endTiming('email', times)"
-                                    placeholder="Introduce tu direccion de correo electrónico" required />
+                                    placeholder="Introduce tu direccion de correo electrónico" oninvalid="this.setCustomValidity('Introduce el E-mail')" required />
                                 <div v-if="errors.email" class="text-danger">{{ errors.email }}</div>
                             </div>
                             <div class="form-group mb-3">
                                 <label for="name">Nombre</label>
                                 <input type="name" class="form-control" id="name" v-model="name"
                                     @focus="startTiming('name')" @blur="() => endTiming('name', times)"
-                                    placeholder="Enter your name" required />
+                                    placeholder="Introduce tu nombre" oninvalid="this.setCustomValidity('Introduce el nombre')" required />
                                 <div v-if="errors.name" class="text-danger">{{ errors.name }}</div>
                             </div>
                             <div class="form-group mb-3">
                                 <label for="password">Password</label>
                                 <input type="password" class="form-control" id="password" v-model="password"
                                     @focus="startTiming('password')" @blur="() => endTiming('password', times)"
-                                    placeholder="Introduce tu contraseña" required />
+                                    placeholder="Introduce tu contraseña" oninvalid="this.setCustomValidity('Introduce la contraseña')" required />
                                 <div v-if="errors.password" class="text-danger">{{ errors.password }}</div>
                             </div>
                             <div class="form-group mb-3">
                                 <label for="confirmPassword">Confirmar contraseña</label>
                                 <input @focus="startTiming('confirmPassword')"
                                     @blur="() => endTiming('confirmPassword', times)" type="password"
-                                    class="form-control" id="confirmPassword" v-model="confirmPassword"
+                                    class="form-control" id="confirmPassword" oninvalid="this.setCustomValidity('Vuelve a introducir la contraseña')" v-model="confirmPassword"
                                     placeholder="Vuelve a introducir tu contraseña" required />
                                 <div v-if="errors.confirmPassword" class="text-danger">{{ errors.confirmPassword }}
                                 </div>

@@ -10,13 +10,13 @@
                                 <label for="email">Correo electrónico</label>
                                 <input type="email" class="form-control" id="email" v-model="email"
                                     @focus="startTiming('email')" @blur="() => endTiming('email', times)"
-                                    placeholder="Introduce tu direccion de correo electrónico" required />
+                                    placeholder="Introduce tu direccion de correo electrónico" oninvalid="this.setCustomValidity('Introduce el E-mail')" required />
                             </div>
                             <div class="form-group mb-3">
                                 <label for="password">Contraseña</label>
                                 <input type="password" class="form-control" id="password" v-model="password"
                                     @focus="startTiming('password')" @blur="() => endTiming('password', times)"
-                                    placeholder="Introduce tu contraseña" required />
+                                    placeholder="Introduce tu contraseña" required oninvalid="this.setCustomValidity('Introduce la contraseña')" />
                             </div>
                             <button type="submit" class="btn btn-primary w-100">Iniciar sesión</button>
                         </form>
