@@ -114,6 +114,11 @@ const routes = [
       }
     },
   },
+  {
+    path: "/wysiwyg",
+    name: "WYSIWYG",
+    component: () => import("./views/WYSIWYG.vue"),
+  },
 ];
 
 const router = createRouter({

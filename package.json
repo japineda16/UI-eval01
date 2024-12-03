@@ -11,13 +11,16 @@
   "dependencies": {
     "@popperjs/core": "^2.11.8",
     "@supabase/supabase-js": "^2.45.4",
+    "@vueup/vue-quill": "^1.2.0",
     "axios": "^1.7.7",
     "bootstrap": "^5.3.3",
+    "bootstrap-icons": "^1.11.3",
     "gsap": "^3.12.5",
     "leaflet": "^1.9.4",
     "pdfjs-dist": "^4.8.69",
     "sass": "^1.78.0",
     "three": "^0.169.0",
+    "video.js": "^8.19.1",
     "vue": "^3.4.37",
     "vue-router": "^4.4.5"
   },
