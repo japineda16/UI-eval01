@@ -54,6 +54,7 @@ const isPlaying = ref(false)
 const progress = ref(0)
 const showSubtitles = ref(true)
 const isDragging = ref(false)
+const timeline = ref(null)
 
 const togglePlay = () => {
     if (videoPlayer.value.paused) {
@@ -117,6 +118,19 @@ const seek = (event) => {
     const percentage = (clickPosition / timelineRect.width)
     const newTime = percentage * videoPlayer.value.duration
     videoPlayer.value.currentTime = newTime
+    progress.value = percentage * 100
+}
+
+const updateSeekHover = (event) => {
+    const timelineRect = timeline.value.getBoundingClientRect()
+    let mousePosition = event.clientX - timelineRect.left
+
+    // Asegurar que el tooltip no se salga de los límites
+    mousePosition = Math.max(0, Math.min(mousePosition, timelineRect.width))
+
+    tooltipPosition.value = mousePosition
+    const percentage = mousePosition / timelineRect.width
+    hoverTime.value = percentage * videoPlayer.value.duration
 }
 
 onMounted(() => {
@@ -187,8 +201,9 @@ video {
 }
 
 .progress-bar {
+    position: absolute;
     height: 100%;
-    background: #ff0000;
+    background: #007bff;
     border-radius: 2px;
     transition: width 0.1s;
 }
@@ -246,7 +261,7 @@ video {
     top: 50%;
     transform: translate(-50%, -50%);
     opacity: 0;
-    transition: opacity 0.2s, transform 0.2s, width 0.2s, height 0.2s;
+    transition: opacity 0.2s, transform 0.2s;
 }
 
 .timeline:hover .progress-handle,
