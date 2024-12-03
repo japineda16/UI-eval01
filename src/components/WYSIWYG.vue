@@ -75,6 +75,14 @@
                 Limpiar
             </button>
         </div>
+        <!-- Vista previa en tiempo real -->
+        <div class="preview mt-3" v-if="editorContent.length > 0">
+            <h3>Vista previa:</h3>
+            <div v-html="editorContent"></div>
+        </div>
+        <div v-if="editorContent.length <= 0">
+            <Terms />
+        </div>
     </div>
 </template>
 
@@ -83,6 +91,7 @@ import { ref, onMounted, onBeforeUnmount } from 'vue'
 import Quill from 'quill'
 import 'quill/dist/quill.snow.css'
 import { supabase } from '../utils/supabase'
+import Terms from '../views/Terms.vue'
 
 const props = defineProps({
     initialContent: {
@@ -95,6 +104,7 @@ const emit = defineEmits(['save', 'change'])
 
 const editor = ref(null)
 let quill = null
+const editorContent = ref('') // Propiedad reactiva para el contenido del editor
 
 // Opciones del editor
 const editorOptions = {
@@ -112,10 +122,12 @@ onMounted(() => {
     // Establecer contenido inicial si existe
     if (props.initialContent) {
         quill.root.innerHTML = props.initialContent
+        editorContent.value = props.initialContent // Inicializar vista previa
     }
 
     // Escuchar cambios
     quill.on('text-change', () => {
+        editorContent.value = quill.root.innerHTML // Actualizar vista previa
         emit('change', quill.root.innerHTML)
     })
 })
@@ -152,6 +164,7 @@ const saveContent = async () => {
 const clearContent = () => {
     if (confirm('¿Estás seguro de que quieres limpiar todo el contenido?')) {
         quill.setText('')
+        editorContent.value = '' // Limpiar vista previa
     }
 }
 
@@ -201,5 +214,12 @@ defineExpose({
         margin-right: 0 !important;
         margin-bottom: 5px;
     }
+}
+
+.preview {
+    border: 1px solid #ccc;
+    padding: 1rem;
+    border-radius: 4px;
+    background: white;
 }
 </style>
