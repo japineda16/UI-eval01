@@ -21,7 +21,7 @@
                             <button type="submit" class="btn btn-primary w-100">Iniciar sesión</button>
                         </form>
                         <div v-if="errorMessage" class="alert alert-danger mt-3">
-                            {{ errorMessage }}
+                            E-mail o contraseña incorrectos
                         </div>
                     </div>
 

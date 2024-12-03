@@ -7,12 +7,12 @@
                 <div class="col">
                     <label for="firstName">Primer nombre</label>
                     <input @focus="startInputTiming('firstName')" @blur="endInputTiming('firstName')" type="text"
-                        v-model="profile.name.first" class="form-control" id="firstName" required />
+                        v-model="profile.name.first" class="form-control" id="firstName" oninvalid="this.setCustomValidity('Introduce el nombre')" required />
                 </div>
                 <div class="col">
                     <label for="lastName">Apellidos</label>
                     <input @focus="startInputTiming('lastName')" @blur="endInputTiming('lastName')" type="text"
-                        v-model="profile.name.last" class="form-control" id="lastName" required />
+                        v-model="profile.name.last" class="form-control" id="lastName"  oninvalid="this.setCustomValidity('Introduce el apellido')"required />
                 </div>
             </div>
 
@@ -21,7 +21,7 @@
                 <label for="address">Dirección</label>
                 <input @focus="startInputTiming('address')" @blur="endInputTiming('address')" type="text"
                     v-model="addressQuery" class="form-control" id="address" @input="fetchLocationSuggestions"
-                    placeholder="Buscar dirección..." required />
+                    placeholder="Buscar dirección..."  oninvalid="this.setCustomValidity('Introduce la direccion')" required />
                 <!-- Sugerencias de dirección -->
                 <ul class="list-group mt-2" v-if="suggestions.length > 0">
                     <li class="list-group-item" v-for="(suggestion, index) in suggestions" :key="index"
@@ -46,13 +46,13 @@
             <div class="form-group">
                 <label for="phone">Telefono</label>
                 <input @focus="startInputTiming('phone')" @blur="endInputTiming('phone')" type="text"
-                    v-model="profile.phone" class="form-control" id="phone" required />
+                    v-model="profile.phone" class="form-control" id="phone" oninvalid="this.setCustomValidity('Introduce el numero de telefono')" required />
             </div>
 
             <!-- Campo de carga de foto -->
             <div class="form-group">
                 <label for="picture">Foto</label>
-                <input type="file" class="form-control" id="picture" @change="handleFileChange"
+                <input type="file" class="form-control" id="picture" oninvalid="this.setCustomValidity('Introduce una imagen')" @change="handleFileChange"
                     @focus="startInputTiming('picture')" @blur="endInputTiming('picture')" />
                 <img v-if="typeof profile.picture === 'string' && profile.picture" :src="profile.picture"
                     alt="Foto del perfil" class="mt-2" width="150" />
